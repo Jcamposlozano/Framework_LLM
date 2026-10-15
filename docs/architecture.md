@@ -1,0 +1,57 @@
+# Decisiones de la Fase 1
+
+## Límites
+
+`extracteval` es una biblioteca independiente con distribución y versión propias. No se ha inspeccionado ni modificado ningún repositorio externo. Solo Pydantic es una dependencia de ejecución.
+
+`core` contiene datos y puertos, no llamadas a modelos ni componentes científicos implementados. `adapters.models.mock` depende de esos contratos. No existe dependencia inversa. Los puertos de almacenamiento no tienen implementación en esta fase.
+
+La composición y ejecución de extracción y verificación pertenecen a fases posteriores. No se crean todavía puertos de extracción, reconciliación o calibración que dependan de contratos aún no implementados. La configuración permite bindings diferentes para extractor y verificador.
+
+## Valores y estados
+
+Se reemplaza el enum inicialmente propuesto de múltiples estados por dimensiones ortogonales. `indeterminado` es un valor cuando el diccionario lo define; no se infiere abstención por el texto de una categoría. No existe un estado clínico universal ni reconocimiento especial de categorías.
+
+La operación fallida exige un error técnico y prohíbe valor y abstención. La operación completada prohíbe error técnico. Abstenerse prohíbe un valor. La evidencia puede evaluarse independientemente; una salida sin sustento puede conservarse como valor para su futura evaluación de errores. No se presupone que una salida completada sea correcta.
+
+Los valores etiquetados evitan confundir booleanos con números y fechas con texto. `validate_against` comprueba el diccionario explícitamente; no ejecuta todavía instrucciones de interpretación ni reglas de normalización.
+
+## Referencia independiente
+
+La anotación experta no hereda de una respuesta de modelo ni de una extracción. Registra evaluador, cegamiento declarado, diccionario, partición y evidencia. El adjudicado exige al menos dos anotadores distintos, el mismo campo y partición, declaración coherente de desacuerdo y resolución explícita. El valor final puede diferir de ambos anotadores.
+
+El cegamiento es una declaración auditable, no una garantía técnica. Las particiones etiquetadas no implementan separación por entidad ni prevención completa de fuga: eso requiere el diseño de muestreo y los flujos de fases posteriores. En Fase 1 no se ajustan reglas, modelos ni umbrales.
+
+## Reproducibilidad
+
+Los artefactos usan identificador, versión y SHA-256. La configuración tiene una huella canónica local (JSON ordenado, formato de contratos 1.0), no un estándar de canonicalización entre lenguajes. El manifiesto identifica ejecución, configuración, tiempos, repetición, modelos y artefactos. Puede representar también tareas sin modelos.
+
+La identidad del modelo admite una versión desconocida mediante `None`; el registro de ejecución exige entonces `model_version_unavailable` y prohíbe declarar reproducibilidad exacta. No se inventan versiones para completar metadatos. Las semillas solo pueden solicitarse cuando las capacidades lo permitan. Los mocks garantizan su contenido bajo condiciones documentadas, no tiempos idénticos.
+
+No hay persistencia automática. Los puertos de repositorio y artefactos especifican conservación sin sobrescritura para futuras implementaciones. Los consumidores conservan instantáneas serializadas; `frozen=True` no congela profundamente metadatos arbitrarios.
+
+## Extensión prevista
+
+1. Diccionarios JSON o estructuras Python, validados sin ejecutar código de configuración.
+2. Adaptadores por inyección de `ModelPort`, con SDK confinados a extras opcionales.
+3. Evaluación a partir de resultados y referencias importados, sin construir adaptadores.
+4. Reglas y políticas registradas explícitamente por identificador.
+5. Aplicaciones de dominio en repositorios consumidores.
+
+## Correspondencia metodológica futura
+
+| Etapa | Responsabilidad futura |
+|---|---|
+| Especificación operacional | Registro, normalización y reglas configurables |
+| Diseño estadístico | Muestreo, unidades, pesos y particiones por entidad |
+| Estabilidad | Repeticiones controladas y perturbaciones |
+| Referencia independiente | Flujos de anotación y adjudicación |
+| Validez | PGEC, comparación pareada e incertidumbre agrupada |
+| Calidad | Señales observables y taxonomía de errores |
+| Fiabilidad | Entrenamiento, calibración y evaluación separadas |
+
+Son capacidades combinables, no siete pasos obligatorios de ejecución.
+
+## Pendientes para Fase 2
+
+Registro y carga de diccionarios, aplicación de reglas, normalización de salida textual, extractor genérico, configuración de esquemas de salida y selección justificada de un primer adaptador real opcional. Ninguno se implementa en Fase 1. PGEC y calibración permanecen en sus fases posteriores.
