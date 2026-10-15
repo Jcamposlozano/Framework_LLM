@@ -4,6 +4,8 @@ Paquete Python independiente para contratos de extracción documental y su futur
 
 ## Instructivo detallado
 
+**Para usar tus propios documentos y variables:** sigue [Cómo hacer tu propia prueba](docs/tu-primera-prueba.md). Incluye una plantilla editable sin mocks; valida valores suministrados por el usuario. La extracción automática con LLM aún requiere la Fase 2.
+
 Empieza por la [guía de uso en español](docs/guia-de-uso.md): instalación, tutorial completo, diccionarios, evidencia, estados, modelos simulados, referencia experta, manifiestos, integración desde otro proyecto y solución de errores.
 
 Para practicar con archivos sintéticos en una carpeta nueva:

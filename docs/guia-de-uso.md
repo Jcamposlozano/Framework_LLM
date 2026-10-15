@@ -12,6 +12,12 @@ El directorio del proyecto en esta máquina es:
 /Users/jonathancamposlozano/Documents/Phd/Framework
 ```
 
+## Si quieres hacer tu propia prueba
+
+Empieza por **[Cómo hacer tu propia prueba](tu-primera-prueba.md)**. Ese recorrido indica exactamente qué archivo copiar, qué campos editar, qué comando ejecutar y cómo comprobar un valor propio. Usa `examples/mi_primera_prueba.py`, sin mocks.
+
+La distinción es fundamental: hoy puedes registrar y validar un valor que tú suministras. Si necesitas que un LLM lea documentos y obtenga automáticamente los valores, todavía falta la Fase 2. Cambiar el documento de una demostración no convierte un mock en un extractor.
+
 ## Índice
 
 1. [Qué puedes hacer hoy](#1-qué-puedes-hacer-hoy)
@@ -1040,6 +1046,16 @@ python -c 'import extracteval; print(extracteval.__file__)'
 ```
 
 Este ajuste no cambia el código ni necesita modificar `sys.path`. Solo corresponde a ese diagnóstico de una instalación editable en macOS; no es un paso de instalación general.
+
+Si el fallo reaparece, no dependas de cambiar repetidamente el atributo del archivo. Para usar la versión instalada en el laboratorio, sustituye la instalación editable por el wheel local. Con las dependencias ya instaladas y `pip check` correcto, ejecuta desde `Framework`:
+
+```sh
+.venv/bin/python -m pip install --no-index --no-deps --force-reinstall dist/extracteval-0.1.0-py3-none-any.whl
+.venv/bin/python -c 'import extracteval; print(extracteval.__file__)'
+.venv/bin/python -m pytest -q
+```
+
+La ruta de importación debe quedar dentro de `.venv/lib/python.../site-packages/extracteval/`, en lugar de `Framework/src/`. Esta instalación evita el enlace `.pth`. Los cambios futuros en `src/` requerirán reconstruir el wheel y reinstalarlo para que afecten al entorno. El uso del intérprete explícito `.venv/bin/python` también evita ambigüedad entre el entorno del proyecto y Conda.
 
 ### Manejar errores sin exponer contenido
 
