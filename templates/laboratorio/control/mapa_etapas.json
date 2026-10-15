@@ -1,0 +1,51 @@
+[
+  {
+    "id": "E1",
+    "nombre": "Especificación operacional",
+    "carpeta": "01_especificacion",
+    "soporte_software": "parcial_contratos",
+    "producto_esperado": "Diccionario, esquema y criterios de corrección revisados y versionados."
+  },
+  {
+    "id": "E2",
+    "nombre": "Diseño estadístico de la evaluación",
+    "carpeta": "02_diseno",
+    "soporte_software": "manual_externo",
+    "producto_esperado": "Protocolo preespecificado, muestra y particiones por entidad."
+  },
+  {
+    "id": "E3",
+    "nombre": "Repetibilidad, robustez y concordancia",
+    "carpeta": "03_estabilidad",
+    "soporte_software": "no_implementado",
+    "producto_esperado": "Perfiles de estabilidad y concordancia con incertidumbre y condiciones registradas."
+  },
+  {
+    "id": "E4",
+    "nombre": "Referencia independiente",
+    "carpeta": "04_referencia",
+    "soporte_software": "parcial_contratos",
+    "producto_esperado": "Anotaciones originales, concordancia previa y referencia adjudicada con razones."
+  },
+  {
+    "id": "E5",
+    "nombre": "Validez y efecto de la verificación",
+    "carpeta": "05_validez",
+    "soporte_software": "no_implementado",
+    "producto_esperado": "PGEC A/B, diferencia pareada e IC95%, métricas por variable y balance de errores."
+  },
+  {
+    "id": "E6",
+    "nombre": "Errores y señales de calidad",
+    "carpeta": "06_calidad",
+    "soporte_software": "no_implementado",
+    "producto_esperado": "Taxonomía aplicada, distribución de errores y señales observables versionadas."
+  },
+  {
+    "id": "E7",
+    "nombre": "Fiabilidad calibrada y aptitud para el uso",
+    "carpeta": "07_fiabilidad",
+    "soporte_software": "no_implementado",
+    "producto_esperado": "Estimador evaluado fuera de ajuste, calibración, riesgo-cobertura y política de uso."
+  }
+]

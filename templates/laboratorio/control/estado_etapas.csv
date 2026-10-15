@@ -1,0 +1,8 @@
+etapa,nombre,estado,responsable,fecha_inicio,fecha_fin,resultado_obtenido,ruta_evidencia,justificacion,validado_por
+E1,Especificación operacional,pendiente,,,,,,,
+E2,Diseño estadístico de la evaluación,pendiente,,,,,,,
+E3,"Repetibilidad, robustez y concordancia",pendiente,,,,,,,
+E4,Referencia independiente,pendiente,,,,,,,
+E5,Validez y efecto de la verificación,pendiente,,,,,,,
+E6,Errores y señales de calidad,pendiente,,,,,,,
+E7,Fiabilidad calibrada y aptitud para el uso,pendiente,,,,,,,

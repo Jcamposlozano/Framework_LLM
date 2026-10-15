@@ -17,7 +17,7 @@ dev = ["build>=1.2,<2", "pytest>=8,<10", "ruff>=0.9,<1", "mypy>=1.14,<2", "hatch
 packages = ["src/extracteval"]
 
 [tool.hatch.build.targets.sdist]
-include = ["/src", "/tests", "/examples", "/docs", "/README.md", "/CHANGELOG.md", "/pyproject.toml", "/requirements-dev.lock"]
+include = ["/src", "/tests", "/examples", "/docs", "/README.md", "/CHANGELOG.md", "/pyproject.toml", "/requirements-dev.lock", "/scripts", "/templates"]
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]

@@ -2,6 +2,17 @@
 
 Paquete Python independiente para contratos de extracción documental y su futura evaluación científica. Versión inicial **0.1.0**, formato de contratos **1.0**. Python **>=3.11**, Pydantic **2**. No inicializa servicios ni realiza llamadas externas al importar.
 
+## Crear un laboratorio nuevo y controlar las siete etapas
+
+Sigue el [procedimiento de creación y dirección del laboratorio](docs/crear-y-dirigir-un-laboratorio.md). Prepara archivos sin datos, una lista de 49 actividades y un tablero de siete etapas. No ejecuta modelos ni cálculos científicos.
+
+```sh
+.venv/bin/python scripts/laboratorio.py crear --destino laboratorios/mi_estudio_001
+.venv/bin/python scripts/laboratorio.py estado --laboratorio laboratorios/mi_estudio_001
+```
+
+En esta entrega también se preparó `laboratorios/laboratorio_001`. Empieza por su `LEEME_PRIMERO.md`. Para crear otro, elige un destino nuevo; no se sobrescriben laboratorios existentes.
+
 ## Instructivo detallado
 
 **Para usar tus propios documentos y variables:** sigue [Cómo hacer tu propia prueba](docs/tu-primera-prueba.md). Incluye una plantilla editable sin mocks; valida valores suministrados por el usuario. La extracción automática con LLM aún requiere la Fase 2.

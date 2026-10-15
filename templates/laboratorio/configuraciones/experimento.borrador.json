@@ -1,0 +1,14 @@
+{
+  "estado_plantilla": "borrador_no_ejecutable",
+  "config_id": null,
+  "version": null,
+  "dictionary": null,
+  "output_schema": null,
+  "extractor": null,
+  "verifier": null,
+  "extractor_instructions": null,
+  "verifier_instructions": null,
+  "reconciliation_policy": null,
+  "partition": null,
+  "repetitions": null
+}

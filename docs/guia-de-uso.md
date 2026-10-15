@@ -12,6 +12,10 @@ El directorio del proyecto en esta máquina es:
 /Users/jonathancamposlozano/Documents/Phd/Framework
 ```
 
+## Si necesitas organizar un estudio completo
+
+Consulta [Crear y dirigir un laboratorio](crear-y-dirigir-un-laboratorio.md): prepara carpetas, archivos en blanco y un tablero con 49 actividades, alineado con las siete etapas del PDF metodológico. La creación no ejecuta esas etapas ni marca productos como obtenidos.
+
 ## Si quieres hacer tu propia prueba
 
 Empieza por **[Cómo hacer tu propia prueba](tu-primera-prueba.md)**. Ese recorrido indica exactamente qué archivo copiar, qué campos editar, qué comando ejecutar y cómo comprobar un valor propio. Usa `examples/mi_primera_prueba.py`, sin mocks.
