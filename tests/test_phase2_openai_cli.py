@@ -1,12 +1,13 @@
 """No network: fake HTTP transport checks actual Responses requests and retries."""
 
+from copy import deepcopy
 from pathlib import Path
 
 import pytest
 
 from extracteval.adapters.models.openai import OpenAIResponsesModel, TransportFailure
 from extracteval.application.configuration import GovernanceAuthorization, load_configuration
-from extracteval.application.verification import IndependentVerifier
+from extracteval.application.verification import IndependentVerifier, strict_schema
 from extracteval.cli import main
 from extracteval.core.exceptions import UnsupportedConfigurationError
 from extracteval.core.hashing import content_hash
@@ -74,6 +75,7 @@ def test_openai_checks_model_schema_and_audit():
     def check_schema(node):
         if isinstance(node, dict):
             assert "default" not in node
+            assert "oneOf" not in node and "discriminator" not in node
             if "properties" in node:
                 assert set(node["required"]) == set(node["properties"])
                 assert node["additionalProperties"] is False
@@ -92,6 +94,20 @@ def test_openai_checks_model_schema_and_audit():
     assert audit.response.usage.input_tokens == 100
     assert audit.cost_estimate is None
     assert audit.response.cost is None
+
+
+def test_strict_schema_preserves_public_schema_and_tagged_nullable_union():
+    original = VerificationPayload.model_json_schema()
+    before = deepcopy(original)
+    converted = strict_schema(original)
+    assert original == before
+    proposal = converted["$defs"]["VariableVerification"]["properties"]["proposed_value"]
+    variants, null = proposal["anyOf"]
+    assert null == {"type": "null"}
+    assert len(variants["anyOf"]) == 5
+    for variant in variants["anyOf"]:
+        name = variant["$ref"].split("/")[-1]
+        assert "const" in converted["$defs"][name]["properties"]["kind"]
 
 
 def test_rate_limit_retries_preserve_telemetry():

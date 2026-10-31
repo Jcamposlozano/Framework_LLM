@@ -27,7 +27,10 @@ from extracteval.adapters.models.verification_mock import (  # noqa: E402
     MockVerifierModel,
 )
 from extracteval.adapters.storage.json_store import JSONRunStore  # noqa: E402
-from extracteval.application.configuration import load_configuration  # noqa: E402
+from extracteval.application.configuration import (
+    GovernanceAuthorization,  # noqa: E402
+    load_configuration,  # noqa: E402
+)
 from extracteval.application.extraction import (  # noqa: E402
     ExtractionExecution,
     extract_document,
@@ -397,6 +400,176 @@ def test_existing_openai_adapter_separate_schema_and_effective_identity(setup_a,
     body = transport.calls[1][2]
     assert body["text"]["format"]["name"] == "clinical_extraction"
     assert "temperature" not in body and "seed" not in body
+    assert result.audit.response.usage is None
+
+
+@pytest.mark.parametrize("v_status", ["completed", "incomplete", "refusal"])
+def test_real_cli_route_with_fake_transport_and_no_credentials(
+    setup_a, tmp_path, monkeypatch, v_status
+):
+    """Exercise real-mode guards and both CLIs, without constructing an HTTP client."""
+    lab, config_a, _, dictionary, _, document, fixture = setup_a
+    monkeypatch.delenv("OPENAI_API_KEY", raising=False)
+    calls = {"A": [], "V": []}
+    constructions = []
+
+    def transport_for(role):
+        class Transport:
+            def request(self, method, path, payload, timeout):
+                calls[role].append((method, path, payload, timeout))
+                if method == "GET":
+                    return {"id": "gpt-4.1-mini"}
+                content = [{"type": "output_text", "text": fixture.model_dump_json()}]
+                if role == "V" and v_status == "refusal":
+                    content = [{"type": "refusal", "refusal": "synthetic refusal"}]
+                return {
+                    "id": "synthetic-response-" + role,
+                    "model": "gpt-4.1-mini-2025-04-14",
+                    "temperature": 1.0,
+                    "status": "incomplete"
+                    if role == "V" and v_status == "incomplete"
+                    else "completed",
+                    "output": [{"type": "message", "content": content}],
+                    "usage": {"input_tokens": 111, "output_tokens": 61},
+                }
+
+        def factory(api_key):
+            assert api_key == ""
+            constructions.append(role)
+            return Transport()
+
+        return factory
+
+    monkeypatch.setattr("extracteval.extraction_cli.OpenAIHTTPTransport", transport_for("A"))
+    monkeypatch.setattr("extracteval.cli.OpenAIHTTPTransport", transport_for("V"))
+    governance = GovernanceAuthorization(
+        document_hash=content_hash(document),
+        authorization_reference="synthetic-test-only",
+        institutional_authorization=True,
+        personal_data_processing_authorized=True,
+        appropriately_deidentified=True,
+        retention_and_access_reviewed=True,
+        provider_transfer_authorized=True,
+    )
+    government_path = tmp_path / "synthetic-authorization.json"
+    government_path.write_text(governance.model_dump_json())
+    a_root, v_root = tmp_path / "a-real-route", tmp_path / "v-real-route"
+    args_a = [
+        "extract",
+        "--config",
+        str(config_a),
+        "--input",
+        str(config_a.parent / "demo-documento.json"),
+        "--output",
+        str(a_root),
+        "--mode",
+        "real",
+        "--authorize-real",
+        "--governance",
+        str(government_path),
+    ]
+    assert main(args_a) == 0
+    original_bytes = (a_root / "extraction_a.json").read_bytes()
+    a = JSONRunStore(a_root).get("extraction_a", ExtractionSnapshot)
+    input_v = tmp_path / "verification-input.json"
+    input_v.write_text(VerificationInput(document=document, extraction_a=a).model_dump_json())
+    args_v = [
+        "verify",
+        "--config",
+        str(lab / "configuraciones/verificacion/v1/config.json"),
+        "--input",
+        str(input_v),
+        "--output",
+        str(v_root),
+        "--mode",
+        "real",
+        "--authorize-real",
+        "--governance",
+        str(government_path),
+    ]
+    expected_exit = 0 if v_status == "completed" else 2
+    assert main(args_v) == expected_exit
+    v = json.loads((v_root / "verification.json").read_bytes())
+    b = JSONRunStore(v_root).get("extraction_b", ReconciledExtraction)
+    assert len(b.decisions) == len(dictionary.variables) == 6
+    assert b.base_extraction_hash == content_hash(a)
+    assert v["audit"]["response"]["usage"]["input_tokens"] == 111
+    assert v["audit"]["response"]["model"]["model_id"] == "gpt-4.1-mini-2025-04-14"
+    assert (v["audit"]["error"] is None) == (v_status == "completed")
+    assert all(d.action in ("KEEP_A", "HUMAN_REVIEW") for d in b.decisions)
+    if v_status != "completed":
+        assert v["audit"]["error"]["code"] == "invalid_response"
+        assert all(d.reason == "technical_failure" for d in b.decisions)
+    for role, schema_name in (("A", "clinical_extraction"), ("V", "independent_verification")):
+        assert [call[0] for call in calls[role]] == ["GET", "POST"]
+        body = calls[role][1][2]
+        assert body["model"] == "gpt-4.1-mini" and body["store"] is False
+        assert body["text"]["format"]["name"] == schema_name
+        assert "oneOf" not in json.dumps(body["text"]["format"]["schema"])
+        assert a.base_extraction_id not in body["input"]
+        assert "synthetic-response-A" not in body["input"]
+    assert constructions == ["A", "V"]
+    before = {str(p): p.read_bytes() for root in (a_root, v_root) for p in root.glob("*.json")}
+    assert main(args_a) == 0 and main(args_v) == expected_exit
+    assert all(Path(p).read_bytes() == content for p, content in before.items())
+    assert constructions == ["A", "V"]
+    assert (a_root / "extraction_a.json").read_bytes() == original_bytes
+    execution = JSONRunStore(a_root).get("execution", ExtractionExecution)
+    assert execution.model_record.effective_parameters.temperature == 1.0
+    assert execution.requested_configuration.extractor.parameters.temperature is None
+
+
+@pytest.mark.parametrize("command", ["extract", "verify"])
+@pytest.mark.parametrize("damage", ["not_authorized", "wrong_document", "missing_flag"])
+def test_real_cli_authorization_rejects_before_transport(
+    setup_a, tmp_path, monkeypatch, command, damage
+):
+    lab, config_a, _, _, _, document, _ = setup_a
+    monkeypatch.delenv("OPENAI_API_KEY", raising=False)
+
+    def forbidden(*args, **kwargs):
+        raise AssertionError("Authorization must be checked before transport construction")
+
+    monkeypatch.setattr("extracteval.extraction_cli.OpenAIHTTPTransport", forbidden)
+    monkeypatch.setattr("extracteval.cli.OpenAIHTTPTransport", forbidden)
+    authorization = GovernanceAuthorization(
+        document_hash="0" * 64 if damage == "wrong_document" else content_hash(document),
+        authorization_reference="synthetic-test-only",
+        institutional_authorization=True,
+        personal_data_processing_authorized=True,
+        appropriately_deidentified=True,
+        retention_and_access_reviewed=True,
+        provider_transfer_authorized=damage != "not_authorized",
+    )
+    governance = tmp_path / "synthetic-authorization.json"
+    governance.write_text(authorization.model_dump_json())
+    config = (
+        config_a if command == "extract" else lab / "configuraciones/verificacion/v1/config.json"
+    )
+    input_path = config_a.parent / "demo-documento.json"
+    if command == "verify":
+        input_path = tmp_path / "independent-input.json"
+        input_path.write_text(VerificationInput(document=document).model_dump_json())
+    output = tmp_path / "blocked-output"
+    args = [
+        command,
+        "--config",
+        str(config),
+        "--input",
+        str(input_path),
+        "--output",
+        str(output),
+        "--mode",
+        "real",
+        "--governance",
+        str(governance),
+    ]
+    if command == "verify":
+        args.extend(["--stage", "independent"])
+    if damage != "missing_flag":
+        args.append("--authorize-real")
+    assert main(args) == 2
+    assert not output.exists()
 
 
 def test_study_yaml_binding_and_no_scientific_authorization():

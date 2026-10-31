@@ -378,6 +378,22 @@ def test_paired_contrast_uses_identical_pairs_not_equal_counts():
     assert result["diferencia_descriptiva_B_menos_A"]["fecha_indice_evento"] is None
 
 
+def test_report_displays_the_pairs_used_in_the_delta():
+    valid = outcome({"kind": "date", "value": "2024-01-01"}, "value")
+    error = outcome(state=None, error="timeout")
+    rows = [row(0, valid, error), row(1, valid, valid), row(2, error, valid)]
+    results = {
+        **compare_repetitions(rows, ["fecha_indice_evento"]),
+        "modo": "mock",
+        "documentos": 1,
+        "ejecuciones": [],
+        "configuraciones": {},
+    }
+    report = render_report(results)
+    assert "pares comunes" in report
+    assert "| fecha_indice_evento | 0/0 | 0/0 | None |" in report
+
+
 def test_mock_execution_never_constructs_HTTP_transport(lab, monkeypatch):
     def forbidden(*args, **kwargs):
         raise AssertionError("No HTTP transport may be created by the mock runner")

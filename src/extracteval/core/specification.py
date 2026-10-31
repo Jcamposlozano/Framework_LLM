@@ -45,8 +45,7 @@ SemanticValue: TypeAlias = Annotated[
     CategoryValue | BooleanValue | NumberValue | DateValue | TextValue,
     Field(discriminator="kind"),
 ]
-# Pydantic accepts an Annotated union at runtime; its generic constructor stub expects a type.
-SEMANTIC_VALUE_ADAPTER: TypeAdapter[SemanticValue] = TypeAdapter(SemanticValue)  # type: ignore[arg-type]
+SEMANTIC_VALUE_ADAPTER: TypeAdapter[SemanticValue] = TypeAdapter(SemanticValue)
 VariableType = Literal["categorical", "boolean", "numeric", "date", "text"]
 
 

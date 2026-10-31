@@ -117,7 +117,17 @@ def run_verification(
     else:
         if verifier is None:
             raise ValueError("A verifier adapter is required for independent reading")
-        verification = verifier.verify_independently(document, dictionary, config)
+        if store.exists("verification-request"):
+            raise ValueError(
+                "Interrupted verification: inspect saved artifacts; no automatic second call"
+            )
+        # Durable intent protects standalone V as well as the stability coordinator.
+        store.put("verification-request", request)
+        # The callback receives only V. The independent interface still cannot accept A.
+        persistent_verifier = IndependentVerifier(
+            verifier.model, persist=lambda value: store.put("verification", value)
+        )
+        verification = persistent_verifier.verify_independently(document, dictionary, config)
         store.put("verification", verification)
     # From here onward, reading is durably persisted before any comparison sees A.
     reconciled: ReconciledExtraction | None = None

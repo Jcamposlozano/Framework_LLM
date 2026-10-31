@@ -200,7 +200,9 @@ class OpenAIResponsesModel:
                     reasoning_tokens=(usage.get("output_tokens_details") or {}).get(
                         "reasoning_tokens"
                     ),
-                ),
+                )
+                if usage
+                else None,
                 elapsed_seconds=time.perf_counter() - started,
                 retry_count=retries,
                 diagnostic_error_codes=tuple(errors),

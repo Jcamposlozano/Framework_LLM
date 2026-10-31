@@ -1,6 +1,8 @@
 """Blind documentary reading. This use case has no extraction-A argument."""
 
 import json
+from collections.abc import Callable
+from copy import deepcopy
 from time import perf_counter
 from typing import Any
 from uuid import uuid4
@@ -52,11 +54,18 @@ def evidence_findings(document: Document, evidence: tuple[Evidence, ...]) -> tup
 
 
 def strict_schema(schema: dict[str, Any]) -> dict[str, JsonValue]:
-    """Convert Pydantic defaults to the supported strict object schema subset."""
+    """Build the Responses strict subset without changing the public Pydantic schema.
+
+    Tagged variants have mutually exclusive ``kind`` constants, so anyOf preserves
+    their union semantics. Local Pydantic validation remains authoritative.
+    """
 
     def visit(node: Any) -> None:
         if isinstance(node, dict):
             node.pop("default", None)
+            node.pop("discriminator", None)
+            if "oneOf" in node:
+                node["anyOf"] = node.pop("oneOf")
             if "properties" in node:
                 node["required"] = list(node["properties"])
                 node["additionalProperties"] = False
@@ -66,8 +75,9 @@ def strict_schema(schema: dict[str, Any]) -> dict[str, JsonValue]:
             for value in node:
                 visit(value)
 
-    visit(schema)
-    return schema
+    converted = deepcopy(schema)
+    visit(converted)
+    return converted
 
 
 def independent_request(
@@ -107,8 +117,14 @@ def independent_request(
 
 
 class IndependentVerifier:
-    def __init__(self, model: ModelPort) -> None:
+    def __init__(
+        self,
+        model: ModelPort,
+        *,
+        persist: Callable[[IndependentVerification], None] | None = None,
+    ) -> None:
         self.model = model
+        self._persist = persist
 
     def verify_independently(
         self,
@@ -160,7 +176,7 @@ class IndependentVerifier:
             v.variable_id: evidence_findings(document, v.evidence) for v in payload.variables
         }
         request_hash = content_hash(request)
-        return IndependentVerification(
+        verification = IndependentVerification(
             verification_id="verification-" + uuid4().hex,
             document_id=document.document_id,
             document_hash=content_hash(document),
@@ -180,3 +196,6 @@ class IndependentVerifier:
                 errors=errors,
             ),
         )
+        if self._persist is not None:
+            self._persist(verification)
+        return verification

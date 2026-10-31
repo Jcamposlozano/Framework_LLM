@@ -287,11 +287,11 @@ def render_report(results: dict[str, Any]) -> str:
             "",
             "## Modalidad " + summary["modalidad"],
             "",
-            "| Variable | Acuerdo A | Acuerdo B | B − A |",
+            "| Variable | Acuerdo A (pares comunes) | Acuerdo B (pares comunes) | B − A |",
             "|---|---:|---:|---:|",
         ]
         for key in summary["por_variable"]["A"]:
-            values = [summary["por_variable"][s][key]["acuerdo_exacto"] for s in ("A", "B")]
+            values = [summary["contraste_pareado"][key][s] for s in ("A", "B")]
             cells = [f"{v['numerador']}/{v['denominador']}" for v in values]
             lines.append(
                 f"| {key} | {cells[0]} | {cells[1]} | "

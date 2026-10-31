@@ -66,7 +66,9 @@ class ModelRunRecord(Contract):
     @model_validator(mode="after")
     def valid_parameters(self) -> Self:
         self.capabilities.validate_parameters(self.binding.parameters)
-        self.capabilities.validate_parameters(self.effective_parameters)
+        # Capabilities constrain requests, not provider-reported defaults. For example,
+        # Responses can report temperature=1 even when this adapter never requests it.
+        # ModelParameters still validates the observed values and they remain auditable.
         if (
             not self.capabilities.exact_reproducibility
             and "exact_reproducibility_not_guaranteed" not in self.limitations
