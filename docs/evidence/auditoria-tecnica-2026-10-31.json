@@ -1,0 +1,337 @@
+{
+  "date": "2026-10-31",
+  "base_commit": "849f57211fc117bab5806f3a3f03e04026529771",
+  "artifact_root": "laboratorios/auditoria-tecnica-2026-10-31-final",
+  "python": "3.12.14",
+  "mode": "mock",
+  "provider_calls": 0,
+  "network_connections_blocked": true,
+  "real_execution_enabled": false,
+  "clinically_validated": false,
+  "dictionary_preserved_exactly": true,
+  "a_v_b": {
+    "variables": 6,
+    "a_sha256": "0291aad23a71ae143d16f63be8b333bd994146b8ef36808e230560db95dcc70d",
+    "decisions": {
+      "KEEP_A": 2,
+      "HUMAN_REVIEW": 4
+    },
+    "resume_mock_calls": {
+      "A": 0,
+      "V": 0
+    },
+    "artifact_hashes": {
+      "a/execution.json": "cefcecd4e6cd3ab248303ae01ceb17456112efd79fcd03884029b65c261238ce",
+      "a/extraction_a.json": "0291aad23a71ae143d16f63be8b333bd994146b8ef36808e230560db95dcc70d",
+      "a/manifest.json": "f653522c2ae48d16f3c0b06985aba117237443fd65f5f1568001fde0fb6699c9",
+      "a/request.json": "11fa88cd5a72307b90f39a732c94246c15f9da8fa38a7ceb7b1b0d70448529a9",
+      "b/comparison.json": "1d528e7b1cf2236aa9b90f2530f5d082b17832a834f03b6f460e042a893a8398",
+      "b/configuration.json": "b8f8063fc9e366107d2d883175bb6e32035418262ef3c13adbb3f98b4b403819",
+      "b/context.json": "6aa18e1a1bb8382480af9017f0b5f6d6464a1f266a6dd556539c178d55479586",
+      "b/decisions.json": "c7409eeb26f942f0341db4f5a330a4b42cd6dabf9a166f00f82e893ac3497976",
+      "b/document.json": "ec6d1883c667b563cb0801e3941481abc831d3a30d6fdaf7bd746b90fbf3421a",
+      "b/extraction_a.json": "0291aad23a71ae143d16f63be8b333bd994146b8ef36808e230560db95dcc70d",
+      "b/extraction_b.json": "49cc12472681028a6c085b62b1ae760484ed9f7dacd39499e20418b1381f9efb",
+      "b/manifest-all.json": "ec013a616e69cd6191f740df2392ea09a838d497c88e8da42c94fcc0ac32ee04",
+      "b/verification-request.json": "125225d651dfb97aea6c1a1ab9f5e624bf94f8cadf24bad140d5e38520dbefac",
+      "b/verification.json": "cfc515237ba070d329fe0f4b8a341472e7ab8538a7bcc9fc2e4ca546853c27f6",
+      "demostracion.json": "7fb11a864fc5d7aa9602ba04ca461cd5ce4d589c74dc29b854e2a13baf5fcad2"
+    }
+  },
+  "phase3": {
+    "documents": 10,
+    "repetitions": 100,
+    "unique_repetition_ids": 100,
+    "outcomes": {
+      "completed": 97,
+      "technical_failure": 3
+    },
+    "consumption": {
+      "intentos_generate": 160,
+      "llamadas_externas": 0,
+      "respuestas_registradas": 157,
+      "input_tokens": 0,
+      "output_tokens": 0,
+      "tokens_reportados": false,
+      "gasto_real_verificado": null
+    },
+    "resume_identical": true,
+    "integrity_sha256": "faeedbee39e08358147664f728e88674191ce410924af377674aa7b05cafa6ff",
+    "paired_denominators": [
+      {
+        "modality": "A_fija",
+        "per_variable": {
+          "estado_paciente": {
+            "A": {
+              "numerador": 100,
+              "denominador": 100,
+              "proporcion": 1.0
+            },
+            "B": {
+              "numerador": 100,
+              "denominador": 100,
+              "proporcion": 1.0
+            },
+            "delta": 0.0
+          },
+          "exacerbacion_actual": {
+            "A": {
+              "numerador": 100,
+              "denominador": 100,
+              "proporcion": 1.0
+            },
+            "B": {
+              "numerador": 100,
+              "denominador": 100,
+              "proporcion": 1.0
+            },
+            "delta": 0.0
+          },
+          "exacerbacion_previa": {
+            "A": {
+              "numerador": 100,
+              "denominador": 100,
+              "proporcion": 1.0
+            },
+            "B": {
+              "numerador": 100,
+              "denominador": 100,
+              "proporcion": 1.0
+            },
+            "delta": 0.0
+          },
+          "fecha_indice_evento": {
+            "A": {
+              "numerador": 100,
+              "denominador": 100,
+              "proporcion": 1.0
+            },
+            "B": {
+              "numerador": 100,
+              "denominador": 100,
+              "proporcion": 1.0
+            },
+            "delta": 0.0
+          },
+          "precision_temporal": {
+            "A": {
+              "numerador": 100,
+              "denominador": 100,
+              "proporcion": 1.0
+            },
+            "B": {
+              "numerador": 100,
+              "denominador": 100,
+              "proporcion": 1.0
+            },
+            "delta": 0.0
+          },
+          "metodo_fecha": {
+            "A": {
+              "numerador": 100,
+              "denominador": 100,
+              "proporcion": 1.0
+            },
+            "B": {
+              "numerador": 100,
+              "denominador": 100,
+              "proporcion": 1.0
+            },
+            "delta": 0.0
+          }
+        },
+        "complete_record": {
+          "A": {
+            "acuerdo_registro_completo": {
+              "numerador": 100,
+              "denominador": 100,
+              "proporcion": 1.0
+            },
+            "cambio_alguna_variable": {
+              "numerador": 0,
+              "denominador": 100,
+              "proporcion": 0.0
+            },
+            "por_diseno": true
+          },
+          "B": {
+            "acuerdo_registro_completo": {
+              "numerador": 100,
+              "denominador": 100,
+              "proporcion": 1.0
+            },
+            "cambio_alguna_variable": {
+              "numerador": 0,
+              "denominador": 100,
+              "proporcion": 0.0
+            },
+            "por_diseno": false
+          }
+        },
+        "decision_changes": {
+          "numerador": 18,
+          "denominador": 600,
+          "proporcion": 0.03
+        }
+      },
+      {
+        "modality": "completa",
+        "per_variable": {
+          "estado_paciente": {
+            "A": {
+              "numerador": 90,
+              "denominador": 96,
+              "proporcion": 0.9375
+            },
+            "B": {
+              "numerador": 90,
+              "denominador": 96,
+              "proporcion": 0.9375
+            },
+            "delta": 0.0
+          },
+          "exacerbacion_actual": {
+            "A": {
+              "numerador": 96,
+              "denominador": 96,
+              "proporcion": 1.0
+            },
+            "B": {
+              "numerador": 96,
+              "denominador": 96,
+              "proporcion": 1.0
+            },
+            "delta": 0.0
+          },
+          "exacerbacion_previa": {
+            "A": {
+              "numerador": 96,
+              "denominador": 96,
+              "proporcion": 1.0
+            },
+            "B": {
+              "numerador": 96,
+              "denominador": 96,
+              "proporcion": 1.0
+            },
+            "delta": 0.0
+          },
+          "fecha_indice_evento": {
+            "A": {
+              "numerador": 80,
+              "denominador": 92,
+              "proporcion": 0.8695652173913043
+            },
+            "B": {
+              "numerador": 80,
+              "denominador": 92,
+              "proporcion": 0.8695652173913043
+            },
+            "delta": 0.0
+          },
+          "precision_temporal": {
+            "A": {
+              "numerador": 96,
+              "denominador": 96,
+              "proporcion": 1.0
+            },
+            "B": {
+              "numerador": 96,
+              "denominador": 96,
+              "proporcion": 1.0
+            },
+            "delta": 0.0
+          },
+          "metodo_fecha": {
+            "A": {
+              "numerador": 96,
+              "denominador": 96,
+              "proporcion": 1.0
+            },
+            "B": {
+              "numerador": 96,
+              "denominador": 96,
+              "proporcion": 1.0
+            },
+            "delta": 0.0
+          }
+        },
+        "complete_record": {
+          "A": {
+            "acuerdo_registro_completo": {
+              "numerador": 74,
+              "denominador": 92,
+              "proporcion": 0.8043478260869565
+            },
+            "cambio_alguna_variable": {
+              "numerador": 18,
+              "denominador": 92,
+              "proporcion": 0.1956521739130435
+            },
+            "por_diseno": false
+          },
+          "B": {
+            "acuerdo_registro_completo": {
+              "numerador": 74,
+              "denominador": 92,
+              "proporcion": 0.8043478260869565
+            },
+            "cambio_alguna_variable": {
+              "numerador": 18,
+              "denominador": 92,
+              "proporcion": 0.1956521739130435
+            },
+            "por_diseno": false
+          }
+        },
+        "decision_changes": {
+          "numerador": 32,
+          "denominador": 600,
+          "proporcion": 0.05333333333333334
+        }
+      }
+    ]
+  },
+  "audit_sha256": "b45174b9f50559b91e3f6d2bc6520f719802e5af86aa80ad7b4d54eae85b6e5f",
+  "phase3_report_sha256": "eef25d6c9091acaf3f0945dcc91b272e3a9689c40adefa70f200773753f89826",
+  "validation": {
+    "pytest": {
+      "command": ".venv/bin/python -m pytest -q -rs",
+      "passed": 259,
+      "skipped": 1,
+      "failed": 0,
+      "skip_reason": "Local ignored study is not part of a distributed checkout"
+    },
+    "ruff_check": {
+      "command": ".venv/bin/ruff check .",
+      "exit_code": 0
+    },
+    "ruff_format": {
+      "command": ".venv/bin/ruff format --check .",
+      "exit_code": 0,
+      "files": 92
+    },
+    "mypy_clean": {
+      "command": ".venv/bin/mypy --no-incremental",
+      "exit_code": 0,
+      "files": 35
+    },
+    "mypy_incremental": {
+      "command": ".venv/bin/mypy",
+      "exit_code": 0,
+      "files": 35
+    },
+    "build": {
+      "command": ".venv/bin/python -m build --no-isolation",
+      "exit_code": 0,
+      "artifacts": [
+        "extracteval-0.2.0.tar.gz",
+        "extracteval-0.2.0-py3-none-any.whl"
+      ]
+    },
+    "pip_check": {
+      "command": ".venv/bin/python -m pip check",
+      "exit_code": 0
+    }
+  }
+}

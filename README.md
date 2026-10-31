@@ -2,6 +2,30 @@
 
 Paquete Python independiente para extracción documental y su futura evaluación científica. Versión **0.2.0**, formato base de contratos **1.0**. Python **>=3.11**, Pydantic **2**. No inicializa servicios ni realiza llamadas externas al importar.
 
+## Estado técnico comprobado de Fases 1–3
+
+La [auditoría ejecutable](docs/auditoria-integracion-2026-10-31.md) distingue integración
+técnica de validación científica. El modo predeterminado sigue siendo **mock**.
+
+| Estado | Alcance |
+|---|---|
+| Implementado | Contratos, extracción A, verificación V independiente, comparación determinista, reconciliación conservadora B, persistencia inmutable, hashes y reanudación; piloto de estabilidad completo y con A fija. |
+| Probado con mocks | Seis variables, tipos/dominios, evidencia, negaciones programadas, fechas, estados, abstenciones y errores; A → V → B; 10 documentos sintéticos × 5 repeticiones × 2 modalidades. |
+| Ruta real probada con transporte simulado | Ambos CLI con `gpt-4.1-mini`, controles de autorización, esquema estructurado, modelo efectivo, tokens, truncamientos y rechazos. Sin claves ni conexiones a proveedores. |
+| Pendiente de prueba real | Disponibilidad del modelo en una cuenta, aceptación efectiva del esquema por la API, consumo y respuesta de un LLM sobre una nota sintética. La ejecución real permanece deshabilitada por defecto. |
+| Pendiente de validación científica | Aprobación clínica de definiciones y reglas, referencia experta, diseño confirmatorio, PGEC, exactitud, incertidumbre, calibración y robustez. Los resultados simulados no acreditan estas capacidades. |
+
+Para reproducir la auditoría sin acceder a la red, usando un **destino nuevo**:
+
+```sh
+.venv/bin/python scripts/auditar_integracion.py --destino laboratorios/auditoria-001
+```
+
+Genera `auditoria.json`, A/V/B, resultados e informe de estabilidad, comprueba
+reanudación y hashes, y deja una plantilla de gobierno **sin autorizar**. No modifica
+el corpus, el protocolo estadístico ni las definiciones existentes. Los comandos de
+la futura primera prueba real, todavía sin ejecutar, están en la auditoría enlazada.
+
 ## Laboratorio vigente: solo YAML y JSON
 
 Empieza por [Laboratorio sencillo: YAML y JSON](docs/laboratorio-yaml-json.md). En cada etapa se editan planes en YAML y se conservan datos y resultados en JSON. En E1 hay una sola fuente editable: `especificacion.yaml`; su JSON se genera automáticamente.
@@ -30,9 +54,9 @@ python examples/guia_paso_a_paso.py --salida /tmp/extracteval-tutorial-01
 
 El tutorial calcula huellas, guarda 13 archivos y valida su recuperación. No requiere credenciales ni llamadas externas.
 
-## Alcance actual: Fase 1
+## Contratos de Fase 1 e integración posterior
 
-Incluye contratos, referencias expertas, puertos, configuración y manifiestos; además, lectura independiente, comparación determinista, reconciliación por política y persistencia local. Ofrece adaptadores simulados y OpenAI Responses. EPOC se configura externamente. Incluye extracción A con configuración independiente; las métricas de exactitud y la calibración siguen pendientes.
+Incluye contratos, referencias expertas, puertos, configuración y manifiestos. Las Fases 2 y 3 añaden extracción A, lectura independiente V, comparación determinista, reconciliación por política, persistencia local y coordinación de repeticiones. Ofrece adaptadores simulados y OpenAI Responses. EPOC se configura externamente; las métricas de exactitud y la calibración siguen pendientes.
 
 ## Instalación y comprobaciones
 

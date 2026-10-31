@@ -506,6 +506,45 @@ def test_resume_rejects_tampering_and_changed_config(setup_phase2, tmp_path):
     assert not store.exists("comparison")
 
 
+def test_interrupted_verifier_is_never_silently_called_again(setup_phase2, tmp_path):
+    dictionary, policy, config, inputs, payload = setup_phase2
+    store = JSONRunStore(tmp_path / "interrupted")
+
+    class InterruptedModel(MockVerifierModel):
+        def generate(self, request):
+            super().generate(request)
+            raise KeyboardInterrupt("simulated process termination after transmission")
+
+    model = InterruptedModel([payload])
+    with pytest.raises(KeyboardInterrupt):
+        run_verification(inputs, dictionary, policy, config, store, IndependentVerifier(model))
+    assert store.exists("verification-request") and not store.exists("verification")
+    with pytest.raises(ValueError, match="Interrupted verification"):
+        run_verification(inputs, dictionary, policy, config, store, IndependentVerifier(model))
+    assert len(model.requests) == 1
+    assert not store.exists("comparison")
+
+
+def test_completed_verifier_survives_interruption_before_comparison(
+    setup_phase2, tmp_path, monkeypatch
+):
+    dictionary, policy, config, inputs, payload = setup_phase2
+    store = JSONRunStore(tmp_path / "saved-v")
+    model = MockVerifierModel([payload])
+    original = IndependentVerifier.verify_independently
+
+    def interrupted(self, *args, **kwargs):
+        original(self, *args, **kwargs)
+        raise KeyboardInterrupt("simulated interruption after durable verification")
+
+    monkeypatch.setattr(IndependentVerifier, "verify_independently", interrupted)
+    with pytest.raises(KeyboardInterrupt):
+        run_verification(inputs, dictionary, policy, config, store, IndependentVerifier(model))
+    assert store.exists("verification") and not store.exists("comparison")
+    manifest = run_verification(inputs, dictionary, policy, config, store, None)
+    assert manifest.status == "completed" and len(model.requests) == 1
+
+
 def test_reconcile_rejects_stale_comparison(setup_phase2):
     dictionary, policy, _, inputs, _ = setup_phase2
     verification, _ = run_case(setup_phase2)
