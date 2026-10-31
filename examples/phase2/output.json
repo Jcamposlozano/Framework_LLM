@@ -1,0 +1,115 @@
+{
+  "auxiliary": {
+    "criterios_detectados": [],
+    "justificacion_clinica": "Ejemplo sintético.",
+    "nivel_confianza": 0.8,
+    "offset_estimado_dias": null,
+    "ventana_ambiental": null
+  },
+  "base_extraction_hash": "6076d5f1fb8e0880d489f1c4eb065833499b1cc3cbada245adf2b37cadf064b6",
+  "base_extraction_id": "demo-extraccion-a",
+  "clinically_validated": false,
+  "comparison_id": "comparison-41c9648312ddfc958f0ceba9",
+  "contract_version": "1.0",
+  "decisions": [
+    {
+      "action": "HUMAN_REVIEW",
+      "contract_version": "1.0",
+      "previous_state": "indeterminate",
+      "previous_value": null,
+      "reason": "dictionary_not_approved",
+      "requires_human_review": true,
+      "resulting_state": "indeterminate",
+      "resulting_value": null,
+      "rule_id": null,
+      "technical_error": null,
+      "variable_id": "estado_paciente"
+    },
+    {
+      "action": "HUMAN_REVIEW",
+      "contract_version": "1.0",
+      "previous_state": "value",
+      "previous_value": {
+        "contract_version": "1.0",
+        "kind": "categorical",
+        "value": "false"
+      },
+      "reason": "dictionary_not_approved",
+      "requires_human_review": true,
+      "resulting_state": "value",
+      "resulting_value": {
+        "contract_version": "1.0",
+        "kind": "categorical",
+        "value": "false"
+      },
+      "rule_id": null,
+      "technical_error": null,
+      "variable_id": "exacerbacion_actual"
+    },
+    {
+      "action": "HUMAN_REVIEW",
+      "contract_version": "1.0",
+      "previous_state": "indeterminate",
+      "previous_value": null,
+      "reason": "dictionary_not_approved",
+      "requires_human_review": true,
+      "resulting_state": "indeterminate",
+      "resulting_value": null,
+      "rule_id": null,
+      "technical_error": null,
+      "variable_id": "exacerbacion_previa"
+    },
+    {
+      "action": "HUMAN_REVIEW",
+      "contract_version": "1.0",
+      "previous_state": "indeterminate",
+      "previous_value": null,
+      "reason": "dictionary_not_approved",
+      "requires_human_review": true,
+      "resulting_state": "indeterminate",
+      "resulting_value": null,
+      "rule_id": null,
+      "technical_error": null,
+      "variable_id": "fecha_indice_evento"
+    },
+    {
+      "action": "HUMAN_REVIEW",
+      "contract_version": "1.0",
+      "previous_state": "indeterminate",
+      "previous_value": null,
+      "reason": "dictionary_not_approved",
+      "requires_human_review": true,
+      "resulting_state": "indeterminate",
+      "resulting_value": null,
+      "rule_id": null,
+      "technical_error": null,
+      "variable_id": "precision_temporal"
+    },
+    {
+      "action": "HUMAN_REVIEW",
+      "contract_version": "1.0",
+      "previous_state": "indeterminate",
+      "previous_value": null,
+      "reason": "dictionary_not_approved",
+      "requires_human_review": true,
+      "resulting_state": "indeterminate",
+      "resulting_value": null,
+      "rule_id": null,
+      "technical_error": null,
+      "variable_id": "metodo_fecha"
+    }
+  ],
+  "dictionary": {
+    "artifact_id": "epoc_exacerbation_extraction",
+    "contract_version": "1.0",
+    "sha256": "d104de50e839bac1b54f3424595960a064276358993c9c8357a40976e9636a5c",
+    "version": "1.0.0-draft"
+  },
+  "document_hash": "157ee44de83cbcbd55764c4df696ef7b86e305a05d0c828b77fa17daff552a26",
+  "document_id": "demo-sintetico-fase2",
+  "expert_reference_status": "not_provided",
+  "policy_version": "conservative.v1",
+  "reconciliation_id": "reconciliation-feb0f27405284d4c65dd9979",
+  "source_sha256": null,
+  "verification_id": "verification-a1be038f0f8a4a6484de1d8e3bde67ad"
+}

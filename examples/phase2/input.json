@@ -1,0 +1,312 @@
+{
+  "contract_version": "1.0",
+  "document": {
+    "contract_version": "1.0",
+    "document_id": "demo-sintetico-fase2",
+    "entity_id": null,
+    "text": "ANÁLISIS: Exacerbación actual de EPOC documentada. Fecha de inicio desconocida.",
+    "text_ref": null,
+    "document_date": null,
+    "provenance": {},
+    "allowed_context": {},
+    "sections": [
+      {
+        "contract_version": "1.0",
+        "name": "analisis",
+        "start": 0,
+        "end": 79
+      }
+    ]
+  },
+  "extraction_a": {
+    "contract_version": "1.0",
+    "base_extraction_id": "demo-extraccion-a",
+    "source_sha256": null,
+    "document_id": "demo-sintetico-fase2",
+    "dictionary": {
+      "contract_version": "1.0",
+      "artifact_id": "epoc_exacerbation_extraction",
+      "version": "1.0.0-draft",
+      "sha256": "d104de50e839bac1b54f3424595960a064276358993c9c8357a40976e9636a5c"
+    },
+    "results": [
+      {
+        "contract_version": "1.0",
+        "result_id": "demo-a-estado_paciente",
+        "trace": {
+          "contract_version": "1.0",
+          "document_id": "demo-sintetico-fase2",
+          "variable_id": "estado_paciente",
+          "dictionary": {
+            "contract_version": "1.0",
+            "artifact_id": "epoc_exacerbation_extraction",
+            "version": "1.0.0-draft",
+            "sha256": "d104de50e839bac1b54f3424595960a064276358993c9c8357a40976e9636a5c"
+          },
+          "config": {
+            "contract_version": "1.0",
+            "config_id": "demo-synthetic",
+            "version": "1",
+            "sha256": "1111111111111111111111111111111111111111111111111111111111111111"
+          },
+          "execution_id": "demo-original-a",
+          "output_schema": {
+            "contract_version": "1.0",
+            "artifact_id": "demo-schema",
+            "version": "1",
+            "sha256": "2222222222222222222222222222222222222222222222222222222222222222"
+          },
+          "model": null,
+          "instructions": null,
+          "request_id": null,
+          "provider_request_id": null
+        },
+        "operation": "completed",
+        "value": null,
+        "evidence": {
+          "contract_version": "1.0",
+          "availability": "absent",
+          "sufficiency": "insufficient",
+          "items": []
+        },
+        "abstention": null,
+        "technical_error": null,
+        "findings": []
+      },
+      {
+        "contract_version": "1.0",
+        "result_id": "demo-a-exacerbacion_actual",
+        "trace": {
+          "contract_version": "1.0",
+          "document_id": "demo-sintetico-fase2",
+          "variable_id": "exacerbacion_actual",
+          "dictionary": {
+            "contract_version": "1.0",
+            "artifact_id": "epoc_exacerbation_extraction",
+            "version": "1.0.0-draft",
+            "sha256": "d104de50e839bac1b54f3424595960a064276358993c9c8357a40976e9636a5c"
+          },
+          "config": {
+            "contract_version": "1.0",
+            "config_id": "demo-synthetic",
+            "version": "1",
+            "sha256": "1111111111111111111111111111111111111111111111111111111111111111"
+          },
+          "execution_id": "demo-original-a",
+          "output_schema": {
+            "contract_version": "1.0",
+            "artifact_id": "demo-schema",
+            "version": "1",
+            "sha256": "2222222222222222222222222222222222222222222222222222222222222222"
+          },
+          "model": null,
+          "instructions": null,
+          "request_id": null,
+          "provider_request_id": null
+        },
+        "operation": "completed",
+        "value": {
+          "contract_version": "1.0",
+          "kind": "categorical",
+          "value": "false"
+        },
+        "evidence": {
+          "contract_version": "1.0",
+          "availability": "absent",
+          "sufficiency": "insufficient",
+          "items": []
+        },
+        "abstention": null,
+        "technical_error": null,
+        "findings": []
+      },
+      {
+        "contract_version": "1.0",
+        "result_id": "demo-a-exacerbacion_previa",
+        "trace": {
+          "contract_version": "1.0",
+          "document_id": "demo-sintetico-fase2",
+          "variable_id": "exacerbacion_previa",
+          "dictionary": {
+            "contract_version": "1.0",
+            "artifact_id": "epoc_exacerbation_extraction",
+            "version": "1.0.0-draft",
+            "sha256": "d104de50e839bac1b54f3424595960a064276358993c9c8357a40976e9636a5c"
+          },
+          "config": {
+            "contract_version": "1.0",
+            "config_id": "demo-synthetic",
+            "version": "1",
+            "sha256": "1111111111111111111111111111111111111111111111111111111111111111"
+          },
+          "execution_id": "demo-original-a",
+          "output_schema": {
+            "contract_version": "1.0",
+            "artifact_id": "demo-schema",
+            "version": "1",
+            "sha256": "2222222222222222222222222222222222222222222222222222222222222222"
+          },
+          "model": null,
+          "instructions": null,
+          "request_id": null,
+          "provider_request_id": null
+        },
+        "operation": "completed",
+        "value": null,
+        "evidence": {
+          "contract_version": "1.0",
+          "availability": "absent",
+          "sufficiency": "insufficient",
+          "items": []
+        },
+        "abstention": null,
+        "technical_error": null,
+        "findings": []
+      },
+      {
+        "contract_version": "1.0",
+        "result_id": "demo-a-fecha_indice_evento",
+        "trace": {
+          "contract_version": "1.0",
+          "document_id": "demo-sintetico-fase2",
+          "variable_id": "fecha_indice_evento",
+          "dictionary": {
+            "contract_version": "1.0",
+            "artifact_id": "epoc_exacerbation_extraction",
+            "version": "1.0.0-draft",
+            "sha256": "d104de50e839bac1b54f3424595960a064276358993c9c8357a40976e9636a5c"
+          },
+          "config": {
+            "contract_version": "1.0",
+            "config_id": "demo-synthetic",
+            "version": "1",
+            "sha256": "1111111111111111111111111111111111111111111111111111111111111111"
+          },
+          "execution_id": "demo-original-a",
+          "output_schema": {
+            "contract_version": "1.0",
+            "artifact_id": "demo-schema",
+            "version": "1",
+            "sha256": "2222222222222222222222222222222222222222222222222222222222222222"
+          },
+          "model": null,
+          "instructions": null,
+          "request_id": null,
+          "provider_request_id": null
+        },
+        "operation": "completed",
+        "value": null,
+        "evidence": {
+          "contract_version": "1.0",
+          "availability": "absent",
+          "sufficiency": "insufficient",
+          "items": []
+        },
+        "abstention": null,
+        "technical_error": null,
+        "findings": []
+      },
+      {
+        "contract_version": "1.0",
+        "result_id": "demo-a-precision_temporal",
+        "trace": {
+          "contract_version": "1.0",
+          "document_id": "demo-sintetico-fase2",
+          "variable_id": "precision_temporal",
+          "dictionary": {
+            "contract_version": "1.0",
+            "artifact_id": "epoc_exacerbation_extraction",
+            "version": "1.0.0-draft",
+            "sha256": "d104de50e839bac1b54f3424595960a064276358993c9c8357a40976e9636a5c"
+          },
+          "config": {
+            "contract_version": "1.0",
+            "config_id": "demo-synthetic",
+            "version": "1",
+            "sha256": "1111111111111111111111111111111111111111111111111111111111111111"
+          },
+          "execution_id": "demo-original-a",
+          "output_schema": {
+            "contract_version": "1.0",
+            "artifact_id": "demo-schema",
+            "version": "1",
+            "sha256": "2222222222222222222222222222222222222222222222222222222222222222"
+          },
+          "model": null,
+          "instructions": null,
+          "request_id": null,
+          "provider_request_id": null
+        },
+        "operation": "completed",
+        "value": null,
+        "evidence": {
+          "contract_version": "1.0",
+          "availability": "absent",
+          "sufficiency": "insufficient",
+          "items": []
+        },
+        "abstention": null,
+        "technical_error": null,
+        "findings": []
+      },
+      {
+        "contract_version": "1.0",
+        "result_id": "demo-a-metodo_fecha",
+        "trace": {
+          "contract_version": "1.0",
+          "document_id": "demo-sintetico-fase2",
+          "variable_id": "metodo_fecha",
+          "dictionary": {
+            "contract_version": "1.0",
+            "artifact_id": "epoc_exacerbation_extraction",
+            "version": "1.0.0-draft",
+            "sha256": "d104de50e839bac1b54f3424595960a064276358993c9c8357a40976e9636a5c"
+          },
+          "config": {
+            "contract_version": "1.0",
+            "config_id": "demo-synthetic",
+            "version": "1",
+            "sha256": "1111111111111111111111111111111111111111111111111111111111111111"
+          },
+          "execution_id": "demo-original-a",
+          "output_schema": {
+            "contract_version": "1.0",
+            "artifact_id": "demo-schema",
+            "version": "1",
+            "sha256": "2222222222222222222222222222222222222222222222222222222222222222"
+          },
+          "model": null,
+          "instructions": null,
+          "request_id": null,
+          "provider_request_id": null
+        },
+        "operation": "completed",
+        "value": null,
+        "evidence": {
+          "contract_version": "1.0",
+          "availability": "absent",
+          "sufficiency": "insufficient",
+          "items": []
+        },
+        "abstention": null,
+        "technical_error": null,
+        "findings": []
+      }
+    ],
+    "semantic_states": {
+      "estado_paciente": "indeterminate",
+      "exacerbacion_actual": "value",
+      "exacerbacion_previa": "indeterminate",
+      "fecha_indice_evento": "indeterminate",
+      "precision_temporal": "indeterminate",
+      "metodo_fecha": "indeterminate"
+    },
+    "auxiliary": {
+      "offset_estimado_dias": null,
+      "ventana_ambiental": null,
+      "criterios_detectados": [],
+      "justificacion_clinica": "Ejemplo sintético.",
+      "nivel_confianza": 0.8
+    }
+  }
+}

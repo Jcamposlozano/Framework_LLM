@@ -1,0 +1,7 @@
+formato_entrada: tsv
+columna_identificador: ingreso
+columna_texto: analisis
+tipo_identificador: ingreso
+campo_entidad:
+campo_fecha:
+politica: Preservar texto; sustituir identificador por pseudónimo; no inferir fecha ni paciente.

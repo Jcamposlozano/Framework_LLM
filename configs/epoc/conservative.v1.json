@@ -1,0 +1,6 @@
+{
+  "policy_id": "documentary-conservative",
+  "version": "conservative.v1",
+  "replacement_rules": [],
+  "unresolved_action": "HUMAN_REVIEW"
+}

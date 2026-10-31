@@ -1,0 +1,95 @@
+{
+  "contract_version": "1.0",
+  "variables": [
+    {
+      "contract_version": "1.0",
+      "variable_id": "estado_paciente",
+      "proposed_value": null,
+      "semantic_state": "indeterminate",
+      "evidence": [],
+      "evidence_type": "none",
+      "applied_rule_ids": [],
+      "uncertainty_flags": [
+        "insufficient_documentation"
+      ],
+      "requires_human_review": true
+    },
+    {
+      "contract_version": "1.0",
+      "variable_id": "exacerbacion_actual",
+      "proposed_value": {
+        "contract_version": "1.0",
+        "kind": "categorical",
+        "value": "true"
+      },
+      "semantic_state": "value",
+      "evidence": [
+        {
+          "contract_version": "1.0",
+          "document_id": "demo-sintetico-fase2",
+          "section": "analisis",
+          "quote": "Exacerbación actual de EPOC documentada.",
+          "source_ref": null,
+          "start": 10,
+          "end": 50
+        }
+      ],
+      "evidence_type": "literal",
+      "applied_rule_ids": [],
+      "uncertainty_flags": [],
+      "requires_human_review": false
+    },
+    {
+      "contract_version": "1.0",
+      "variable_id": "exacerbacion_previa",
+      "proposed_value": null,
+      "semantic_state": "indeterminate",
+      "evidence": [],
+      "evidence_type": "none",
+      "applied_rule_ids": [],
+      "uncertainty_flags": [
+        "insufficient_documentation"
+      ],
+      "requires_human_review": true
+    },
+    {
+      "contract_version": "1.0",
+      "variable_id": "fecha_indice_evento",
+      "proposed_value": null,
+      "semantic_state": "indeterminate",
+      "evidence": [],
+      "evidence_type": "none",
+      "applied_rule_ids": [],
+      "uncertainty_flags": [
+        "insufficient_documentation"
+      ],
+      "requires_human_review": true
+    },
+    {
+      "contract_version": "1.0",
+      "variable_id": "precision_temporal",
+      "proposed_value": null,
+      "semantic_state": "indeterminate",
+      "evidence": [],
+      "evidence_type": "none",
+      "applied_rule_ids": [],
+      "uncertainty_flags": [
+        "insufficient_documentation"
+      ],
+      "requires_human_review": true
+    },
+    {
+      "contract_version": "1.0",
+      "variable_id": "metodo_fecha",
+      "proposed_value": null,
+      "semantic_state": "indeterminate",
+      "evidence": [],
+      "evidence_type": "none",
+      "applied_rule_ids": [],
+      "uncertainty_flags": [
+        "insufficient_documentation"
+      ],
+      "requires_human_review": true
+    }
+  ]
+}

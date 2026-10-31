@@ -1,5 +1,7 @@
 # Crear y dirigir un laboratorio de extracteval
 
+> **Flujo vigente:** consulta [Laboratorio YAML/JSON](laboratorio-yaml-json.md). Los recorridos con CSV/TXT y varias vistas del diccionario que aparecen más abajo corresponden al formato anterior o a ejemplos didácticos; no son pasos adicionales para `mi_estudio_001`.
+
 ## 1. Qué entrega este procedimiento
 
 Este procedimiento crea una estructura reutilizable para organizar un estudio: carpetas, archivos vacíos para entradas y resultados, formularios de decisiones, una lista de 49 actividades y un tablero de siete etapas. Incluye un comando que prepara un laboratorio nuevo y otro que consulta sus registros de avance.
@@ -55,8 +57,9 @@ Este diagrama resume relaciones de evidencia; no representa dependencias de impo
 |---|---|---|
 | Siete etapas metodológicas | Trabajo científico que debe producir evidencia | Este laboratorio permite planearlas y documentarlas; inicialmente todas pendientes |
 | Fase 1 de implementación | Contratos, puertos, mocks y pruebas | Implementada en `extracteval` 0.1.0 |
-| Fase 2 de implementación | Registro, normalización y extracción genérica con primer adaptador | Pendiente de aprobación/desarrollo |
-| Fases posteriores de implementación | Verificación, estadística, estabilidad, calidad y calibración | Pendientes |
+| Fase 2 de implementación | Importación de A, verificación independiente, comparación y reconciliación | Implementadas en 0.2.0; extractor A disponible con configuración independiente |
+| Fase 3 de implementación | Repetibilidad completa y A fija, perfiles descriptivos e informes | Implementada y probada con mocks; ejecución real y validación científica pendientes |
+| Fases posteriores de implementación | Estadística confirmatoria, calidad y calibración | Pendientes |
 | Este organizador | Crear archivos y consultar control manual | Disponible como script del repositorio |
 
 No hay equivalencia «Fase 1 del software = E1 científica terminada». Para E1 todavía debes definir y revisar el diccionario de tu estudio. La existencia de `ExpertAnnotation` no implica que E4 ya tenga anotaciones reales.
@@ -291,6 +294,6 @@ Brier mide calidad probabilística global, no exclusivamente calibración. La ap
 
 Quedan listos la estructura, los formularios vacíos, las 49 actividades, sus criterios y rutas esperadas, el creador reutilizable y la consulta de control manual.
 
-No quedan implementadas las siete etapas científicas ni nuevas funciones de extracción, verificación o estadística. El paquete sigue siendo 0.1.0/Fase 1. La herramienta no modifica datos clínicos, no genera métricas, no asegura cegamiento ni impone controles de acceso.
+Crear el laboratorio no completa sus siete etapas científicas. El paquete 0.2.0 añade carga local y verificación documental con comparación y reconciliación; el extractor A también está disponible con pruebas sintéticas; las métricas estadísticas siguen pendientes. Consulta [el extractor A](extractor-a.md). El creador de estructuras no ejecuta modelos ni garantiza por sí mismo cegamiento o autorización de acceso.
 
-Los borradores y CSV deben convertirse a contratos válidos antes de alimentar una futura ejecución. El tutorial previo sirve para aprender contratos; no debe mezclarse con tus resultados. No se han introducido datos de demostración en el laboratorio inicial.
+Los borradores deben convertirse a contratos válidos antes de ejecutar procedimientos. El tutorial sirve para aprender contratos; no debe mezclarse con resultados científicos. Las plantillas se crean sin datos; la demostración opcional de fase 2 usa entradas sintéticas separadas del corpus. Consulta [la guía de fase 2](fase2-verificacion-laboratorio.md).

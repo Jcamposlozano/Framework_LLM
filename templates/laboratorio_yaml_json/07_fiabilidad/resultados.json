@@ -1,0 +1,12 @@
+{
+  "estado": "pendiente",
+  "nota": "Sin resultados científicos; completar únicamente con evidencia real.",
+  "modelos": [],
+  "probabilidades": [],
+  "calibracion": [],
+  "brier": null,
+  "riesgo_cobertura": [],
+  "decisiones_uso": [],
+  "limitaciones": [],
+  "conclusiones": null
+}

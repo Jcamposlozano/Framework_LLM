@@ -1,0 +1,17 @@
+poblacion:
+unidades:
+  extraccion:
+  evaluacion:
+  agrupacion:
+estimando_primario:
+tamano_muestra_justificacion:
+muestreo:
+estratos: []
+particiones_planificadas: []
+plan_ajuste_calibracion:
+metodo_ic95:
+reglas_evaluabilidad:
+tratamiento_fallos_abstenciones:
+congelacion:
+  fecha:
+  responsable:

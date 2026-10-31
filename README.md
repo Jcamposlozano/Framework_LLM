@@ -1,21 +1,23 @@
 # extracteval
 
-Paquete Python independiente para contratos de extracción documental y su futura evaluación científica. Versión inicial **0.1.0**, formato de contratos **1.0**. Python **>=3.11**, Pydantic **2**. No inicializa servicios ni realiza llamadas externas al importar.
+Paquete Python independiente para extracción documental y su futura evaluación científica. Versión **0.2.0**, formato base de contratos **1.0**. Python **>=3.11**, Pydantic **2**. No inicializa servicios ni realiza llamadas externas al importar.
 
-## Crear un laboratorio nuevo y controlar las siete etapas
+## Laboratorio vigente: solo YAML y JSON
 
-Sigue el [procedimiento de creación y dirección del laboratorio](docs/crear-y-dirigir-un-laboratorio.md). Prepara archivos sin datos, una lista de 49 actividades y un tablero de siete etapas. No ejecuta modelos ni cálculos científicos.
+Empieza por [Laboratorio sencillo: YAML y JSON](docs/laboratorio-yaml-json.md). En cada etapa se editan planes en YAML y se conservan datos y resultados en JSON. En E1 hay una sola fuente editable: `especificacion.yaml`; su JSON se genera automáticamente.
 
 ```sh
-.venv/bin/python scripts/laboratorio.py crear --destino laboratorios/mi_estudio_001
+.venv/bin/python scripts/laboratorio.py crear --destino laboratorios/otro_estudio
+.venv/bin/python scripts/laboratorio.py preparar-especificacion --laboratorio laboratorios/mi_estudio_001
+.venv/bin/python scripts/laboratorio.py preparar-diseno --laboratorio laboratorios/mi_estudio_001
 .venv/bin/python scripts/laboratorio.py estado --laboratorio laboratorios/mi_estudio_001
 ```
 
-En esta entrega también se preparó `laboratorios/laboratorio_001`. Empieza por su `LEEME_PRIMERO.md`. Para crear otro, elige un destino nuevo; no se sobrescriben laboratorios existentes.
+`mi_estudio_001` ya está migrado. El formato anterior se conserva en historial; no hace falta completar los antiguos CSV. La carga local de textos no ejecuta extracción ni métricas. Para el soporte YAML en un entorno nuevo: `python -m pip install '.[lab]'`.
 
 ## Instructivo detallado
 
-**Para usar tus propios documentos y variables:** sigue [Cómo hacer tu propia prueba](docs/tu-primera-prueba.md). Incluye una plantilla editable sin mocks; valida valores suministrados por el usuario. La extracción automática con LLM aún requiere la Fase 2.
+**Para usar tus propios documentos y variables:** sigue [Cómo hacer tu propia prueba](docs/tu-primera-prueba.md). Incluye una plantilla editable sin mocks para validar valores suministrados. Para verificar una extracción A existente, sigue [la fase 2 del laboratorio](docs/fase2-verificacion-laboratorio.md). Para generar A desde una nota, consulta [el extractor A](docs/extractor-a.md).
 
 Empieza por la [guía de uso en español](docs/guia-de-uso.md): instalación, tutorial completo, diccionarios, evidencia, estados, modelos simulados, referencia experta, manifiestos, integración desde otro proyecto y solución de errores.
 
@@ -30,7 +32,7 @@ El tutorial calcula huellas, guarda 13 archivos y valida su recuperación. No re
 
 ## Alcance actual: Fase 1
 
-Incluye documentos, diccionarios operacionales, valores semánticos tipados, resultados, referencias expertas, contratos de modelos, puertos, configuración, manifiestos y dos adaptadores simulados. No incluye ejecución de extractores/verificadores, métricas, calibración, proveedores reales, persistencia ni reglas de dominio.
+Incluye contratos, referencias expertas, puertos, configuración y manifiestos; además, lectura independiente, comparación determinista, reconciliación por política y persistencia local. Ofrece adaptadores simulados y OpenAI Responses. EPOC se configura externamente. Incluye extracción A con configuración independiente; las métricas de exactitud y la calibración siguen pendientes.
 
 ## Instalación y comprobaciones
 
@@ -101,7 +103,7 @@ Las capacidades se validan antes de consumir una respuesta. Ambos modelos son re
 
 Los manifiestos conservan referencias, parámetros tipados y capacidades; no admiten campos libres para documentos, prompts, credenciales o excepciones originales. Se conserva la limitación explícita cuando no se declara reproducibilidad exacta. `manifest.validate_against(config)` comprueba huella, repetición y bindings registrados. `result.trace.validate_config(config)` comprueba diccionario, esquema e identidad del modelo para el rol indicado. Una versión de modelo desconocida se representa con `None` y exige registrar `model_version_unavailable`; no permite declarar reproducibilidad exacta.
 
-Las huellas de configuración usan JSON ordenado y SHA-256 según el formato 1.0 del paquete. No equivalen a una firma, ni garantizan anonimización o corrección. Las huellas de artefactos declaradas deben ser verificadas por futuras implementaciones de almacenamiento.
+Las huellas de configuración usan JSON ordenado y SHA-256. No equivalen a una firma, ni garantizan anonimización o corrección. La persistencia de fase 2 comprueba las huellas de sus artefactos al reanudar; los puertos generales de fase 1 siguen siendo interfaces.
 
 **Los identificadores deben ser pseudónimos y las referencias deben carecer de credenciales.** Ningún contrato puede detectar un secreto introducido deliberadamente como identificador válido. Los documentos, evidencias y resultados serializados pueden contener contenido sensible: el consumidor controla su acceso y almacenamiento. No se producen logs.
 
@@ -112,3 +114,31 @@ Los modelos son `frozen` para impedir reasignación de atributos, pero sus metad
 ## Arquitectura y próximos pasos
 
 Ver [decisiones y límites](docs/architecture.md) y [verificación de la Fase 1](docs/phase1-validation.md). La evaluación futura consumirá resultados y referencias sin ejecutar ni inicializar modelos. No existe dependencia del núcleo hacia adaptadores. Las siete etapas metodológicas son responsabilidades combinables y no un flujo obligatorio.
+
+## Fase 2: verificación y reconciliación en el laboratorio
+
+La fase 2 incorpora lectura independiente, comparación determinista, reconciliación conservadora, persistencia inmutable y reanudación por documento. Se integra con el diccionario YAML/JSON de cada laboratorio.
+
+```bash
+python scripts/laboratorio.py preparar-verificacion --laboratorio laboratorios/mi_estudio_001
+python scripts/laboratorio.py demo-verificacion --laboratorio laboratorios/mi_estudio_001
+python scripts/laboratorio.py estado-verificacion --laboratorio laboratorios/mi_estudio_001
+```
+
+La demostración usa datos sintéticos y un proveedor simulado. Conserva A, registra discrepancias y produce B sin declararla clínicamente validada. No procesa las notas importadas ni calcula exactitud. El modo real exige autorización explícita y gobierno de datos vinculado al documento.
+
+Consulta [la guía de fase 2](docs/fase2-verificacion-laboratorio.md) para avanzar por procedimientos, registrar A de su extractor, revisar los archivos y configurar modelos. También existe `extracteval verify --config … --input … --output …`, con `--stage independent|compare|reconcile|all`, `--dry-run` y `--mode mock|real`.
+
+### Corpus XLSX
+
+El importador acepta Excel con mapeo explícito de `ingreso`, `analisis` y `FECHA ATENCIÓN`. Conserva el texto, seudonimiza ingresos y registra la fecha de atención sin inferir inicio de exacerbación. La sustitución de un corpus requiere `--reemplazar-con-respaldo`. Consulta [Importación desde Excel](docs/importacion-excel.md).
+
+La [auditoría de la Fase 2](docs/phase2-audit.md) distingue componentes implementados, configurados y pendientes, y documenta las versiones y hashes consolidados en el laboratorio. La configuración real del verificador no equivale a una ejecución real ni a validación científica.
+
+## Fase 3: piloto técnico de estabilidad
+
+El coordinador de [estabilidad](docs/phase3-stability.md) ejecuta repetición completa y verificación con A fija, compara las seis variables y genera JSON e informe con denominadores explícitos. El piloto usa 10 documentos sintéticos y 5 repeticiones por modalidad; no acredita estabilidad clínica ni activa llamadas reales.
+
+```sh
+.venv/bin/python scripts/laboratorio.py ejecutar-estabilidad --laboratorio laboratorios/mi_estudio_001
+```

@@ -9,6 +9,12 @@ from pydantic import Field, JsonValue, model_validator
 from extracteval.core.base import Contract, Identifier
 
 
+class DocumentSection(Contract):
+    name: str = Field(min_length=1)
+    start: int = Field(ge=0, strict=True)
+    end: int = Field(gt=0, strict=True)
+
+
 class Document(Contract):
     document_id: Identifier
     entity_id: Identifier | None = None
@@ -17,16 +23,25 @@ class Document(Contract):
     document_date: date | None = None
     provenance: dict[str, JsonValue] = Field(default_factory=dict, repr=False)
     allowed_context: dict[str, JsonValue] = Field(default_factory=dict, repr=False)
+    sections: tuple[DocumentSection, ...] = ()
 
     @model_validator(mode="after")
     def one_source(self) -> Self:
         if (self.text is None) == (self.text_ref is None):
             raise ValueError("Provide exactly one document content source")
+        if len({s.name for s in self.sections}) != len(self.sections):
+            raise ValueError("Section names must be unique")
+        for section in self.sections:
+            if section.end <= section.start or (
+                self.text is not None and section.end > len(self.text)
+            ):
+                raise ValueError("Invalid document section offsets")
         return self
 
 
 class Evidence(Contract):
     document_id: Identifier
+    section: str | None = None
     quote: str | None = Field(default=None, repr=False)
     source_ref: Identifier | None = None
     start: int | None = Field(default=None, ge=0, strict=True)

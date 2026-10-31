@@ -1,10 +1,12 @@
 # Cómo hacer tu propia prueba con extracteval 0.1.0
 
+> **Flujo vigente:** consulta [Laboratorio YAML/JSON](laboratorio-yaml-json.md). Los recorridos con CSV/TXT y varias vistas del diccionario que aparecen más abajo corresponden al formato anterior o a ejemplos didácticos; no son pasos adicionales para `mi_estudio_001`.
+
 ## Primero: qué significa «hacer mi prueba» en esta versión
 
 Hay dos trabajos distintos:
 
-1. **Quiero que un LLM lea mi documento y extraiga mis variables.** La versión 0.1.0 todavía no lo hace. Para ese trabajo faltan el adaptador real y el extractor de la Fase 2. Editar el texto de un ejemplo con un mock no soluciona esa carencia: el mock seguiría devolviendo el valor programado.
+1. **Quiero que un LLM lea mi documento y extraiga mis variables.** La versión 0.1.0 todavía no lo hace. Para ese trabajo, el paquete actual incorpora un adaptador real y [el extractor A](extractor-a.md), con configuración propia y pruebas sintéticas. Editar el texto de un ejemplo con un mock no soluciona esa carencia: el mock seguiría devolviendo el valor programado.
 2. **Quiero definir una variable mía y comprobar si un valor que yo suministro cumple mi diccionario, conservar su evidencia y guardar una ejecución trazable.** Esto sí puedes hacerlo ahora. Ese es el ejercicio concreto que explica esta página.
 
 La plantilla de este ejercicio no utiliza modelos simulados ni proveedores reales. Tú escribes el documento, la definición de la variable y el valor que quieres comprobar. El framework valida los contratos y guarda los registros. La corrección factual del valor necesita una evaluación independiente que este ejercicio no calcula.
@@ -234,9 +236,9 @@ La prueba anterior permite comprobar representación y validación de tu propia 
 
 Para extracción automática necesitamos definir e implementar:
 
-1. El adaptador que llama al motor elegido, remoto o local.
+1. Integrar el adaptador del motor elegido; ya existe OpenAI Responses, además de mocks.
 2. El extractor que compone la solicitud a partir de tu diccionario y documento.
 3. La normalización y validación de la respuesta.
 4. La conservación de la procedencia efectiva de la llamada.
 
-Estos elementos corresponden a la Fase 2 pendiente de aprobación. La verificación independiente y la evaluación estadística corresponden a fases posteriores. No se incluyen ni se simulan como disponibles en esta plantilla.
+Esta plantilla no implementa un extractor clínico inicial. El paquete 0.2.0 ya incorpora verificación independiente, comparación y reconciliación de una A aportada externamente o producida por [el extractor A](extractor-a.md); consulta [Fase 2 en el laboratorio](fase2-verificacion-laboratorio.md). La evaluación estadística sigue pendiente. La plantilla conserva su alcance didáctico y no ejecuta esos procedimientos automáticamente.

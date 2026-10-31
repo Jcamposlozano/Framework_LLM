@@ -1,0 +1,13 @@
+dictionary_id:
+version:
+status: borrador
+purpose:
+unit_of_analysis:
+anchor_date:
+principles: []
+variables: {}
+consistency_checks: []
+pending_decisions: []
+instrucciones:
+  extractor:
+  verificador:

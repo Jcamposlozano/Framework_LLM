@@ -4,7 +4,7 @@ import json
 from enum import StrEnum
 from typing import Self
 
-from pydantic import Field, StrictStr, model_validator
+from pydantic import Field, JsonValue, StrictStr, model_validator
 
 from extracteval.core.base import Contract, Identifier
 from extracteval.core.exceptions import UnsupportedConfigurationError
@@ -68,11 +68,14 @@ class ModelRequest(Contract):
     instructions: str = Field(repr=False)
     content: str = Field(repr=False)
     parameters: ModelParameters = Field(default_factory=ModelParameters)
+    response_schema: dict[str, JsonValue] | None = Field(default=None, repr=False)
+    timeout_seconds: float = Field(default=60, gt=0, allow_inf_nan=False)
 
 
 class TokenUsage(Contract):
     input_tokens: int | None = Field(default=None, ge=0, strict=True)
     output_tokens: int | None = Field(default=None, ge=0, strict=True)
+    reasoning_tokens: int | None = Field(default=None, ge=0, strict=True)
 
 
 class ModelResponse(Contract):
@@ -90,6 +93,7 @@ class ModelResponse(Contract):
     currency: Identifier | None = None
     elapsed_seconds: float = Field(ge=0, allow_inf_nan=False)
     retry_count: int = Field(default=0, ge=0, strict=True)
+    diagnostic_error_codes: tuple[Identifier, ...] = ()
 
     @model_validator(mode="after")
     def valid_payload(self) -> Self:

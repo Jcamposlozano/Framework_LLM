@@ -1,5 +1,7 @@
 # Instructivo de uso de extracteval
 
+> **Flujo vigente:** consulta [Laboratorio YAML/JSON](laboratorio-yaml-json.md). Los recorridos con CSV/TXT y varias vistas del diccionario que aparecen más abajo corresponden al formato anterior o a ejemplos didácticos; no son pasos adicionales para `mi_estudio_001`.
+
 **Versión del paquete:** 0.1.0. **Formato de contratos:** 1.0. **Alcance:** Fase 1.
 
 **Comprobación del instructivo:** se ejecutaron sus 23 bloques Python en orden, el tutorial completo y su protección contra sobrescritura. Las 72 pruebas existentes, Ruff y mypy también pasan.

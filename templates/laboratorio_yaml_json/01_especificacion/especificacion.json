@@ -1,0 +1,5 @@
+{
+  "estado": "pendiente",
+  "nota": "Plantilla genérica sin datos de estudio. Completa el YAML dentro de laboratorios/<tu_estudio>/01_especificacion y ejecuta preparar-especificacion para generar su JSON.",
+  "diccionario_framework": null
+}

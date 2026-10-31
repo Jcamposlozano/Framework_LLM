@@ -1,0 +1,266 @@
+{
+  "contract_version": "1.0",
+  "artifact": {
+    "contract_version": "1.0",
+    "artifact_id": "epoc_exacerbation_extraction",
+    "version": "1.0.0-draft",
+    "sha256": "d104de50e839bac1b54f3424595960a064276358993c9c8357a40976e9636a5c"
+  },
+  "variables": [
+    {
+      "contract_version": "1.0",
+      "variable_id": "estado_paciente",
+      "version": "1.0.0-draft",
+      "data_type": "categorical",
+      "categories": [
+        "exacerbacion_activa",
+        "post_exacerbacion",
+        "sintomatico",
+        "estable",
+        "indeterminado"
+      ],
+      "operational_definition": "Estado respiratorio documentado en la nota, con referencia a la fecha de consulta.",
+      "interpretation_rules": [
+        "Usar exclusivamente evidencia documentada y contexto autorizado.",
+        "No inferir exacerbación a partir del diagnóstico de EPOC, medicación crónica o síntomas crónicos aislados.",
+        "Distinguir negación explícita, silencio documental, indeterminación y fallo técnico.",
+        "La evaluación clínica independiente es necesaria antes de congelar el diccionario.",
+        "Categoría exacerbacion_activa: Episodio de exacerbación en curso, sustentado por documentación clínica.",
+        "Categoría post_exacerbacion: Episodio reciente descrito como resuelto o en recuperación; duración máxima por definir clínicamente.",
+        "Categoría sintomatico: Síntomas respiratorios documentados sin evidencia suficiente para clasificarlos como exacerbación activa.",
+        "Categoría estable: Estabilidad clínica explícitamente documentada, sin evidencia de exacerbación activa.",
+        "Categoría indeterminado: La documentación no permite asignar de forma sustentada otra categoría."
+      ],
+      "correctness_criteria": [
+        "PENDIENTE DE APROBACIÓN: preespecificar el criterio de corrección y evaluabilidad de esta variable antes de evaluar desempeño."
+      ],
+      "information_policy": {
+        "contract_version": "1.0",
+        "absent": "PENDIENTE DE APROBACIÓN: definir política específica de ausencia documental para esta variable. No inferir valores a partir del silencio; conservar distinción frente a negación explícita.",
+        "indeterminate": "Categoría semántica indeterminado: La documentación no permite asignar de forma sustentada otra categoría. No implica abstención ni error técnico.",
+        "not_applicable": "PENDIENTE DE APROBACIÓN: no se declara una representación de no aplicabilidad en la fuente para esta variable."
+      },
+      "normalization_rules": []
+    },
+    {
+      "contract_version": "1.0",
+      "variable_id": "exacerbacion_actual",
+      "version": "1.0.0-draft",
+      "data_type": "categorical",
+      "categories": [
+        "true",
+        "false",
+        "indeterminado"
+      ],
+      "operational_definition": "Presencia documentada de una exacerbación activa en la fecha de consulta.",
+      "interpretation_rules": [
+        "Usar exclusivamente evidencia documentada y contexto autorizado.",
+        "No inferir exacerbación a partir del diagnóstico de EPOC, medicación crónica o síntomas crónicos aislados.",
+        "Distinguir negación explícita, silencio documental, indeterminación y fallo técnico.",
+        "La evaluación clínica independiente es necesaria antes de congelar el diccionario.",
+        "Categoría true: Exacerbación activa documentada.",
+        "Categoría false: Ausencia de exacerbación activa respaldada explícitamente por la nota.",
+        "Categoría indeterminado: Información insuficiente o contradictoria; silencio no equivale a false."
+      ],
+      "correctness_criteria": [
+        "PENDIENTE DE APROBACIÓN: preespecificar el criterio de corrección y evaluabilidad de esta variable antes de evaluar desempeño."
+      ],
+      "information_policy": {
+        "contract_version": "1.0",
+        "absent": "PENDIENTE DE APROBACIÓN: definir política específica de ausencia documental para esta variable. No inferir valores a partir del silencio; conservar distinción frente a negación explícita.",
+        "indeterminate": "Categoría semántica indeterminado: Información insuficiente o contradictoria; silencio no equivale a false. No implica abstención ni error técnico.",
+        "not_applicable": "PENDIENTE DE APROBACIÓN: no se declara una representación de no aplicabilidad en la fuente para esta variable."
+      },
+      "normalization_rules": []
+    },
+    {
+      "contract_version": "1.0",
+      "variable_id": "exacerbacion_previa",
+      "version": "1.0.0-draft",
+      "data_type": "categorical",
+      "categories": [
+        "true",
+        "false",
+        "indeterminado"
+      ],
+      "operational_definition": "Antecedente documentado de exacerbación anterior al episodio o consulta de referencia; horizonte temporal pendiente de aprobación.",
+      "interpretation_rules": [
+        "Usar exclusivamente evidencia documentada y contexto autorizado.",
+        "No inferir exacerbación a partir del diagnóstico de EPOC, medicación crónica o síntomas crónicos aislados.",
+        "Distinguir negación explícita, silencio documental, indeterminación y fallo técnico.",
+        "La evaluación clínica independiente es necesaria antes de congelar el diccionario.",
+        "Categoría true: Exacerbación anterior documentada.",
+        "Categoría false: Ausencia de antecedentes de exacerbación explícitamente documentada para el horizonte definido.",
+        "Categoría indeterminado: Antecedente no documentado o ambiguo."
+      ],
+      "correctness_criteria": [
+        "PENDIENTE DE APROBACIÓN: preespecificar el criterio de corrección y evaluabilidad de esta variable antes de evaluar desempeño."
+      ],
+      "information_policy": {
+        "contract_version": "1.0",
+        "absent": "PENDIENTE DE APROBACIÓN: definir política específica de ausencia documental para esta variable. No inferir valores a partir del silencio; conservar distinción frente a negación explícita.",
+        "indeterminate": "Categoría semántica indeterminado: Antecedente no documentado o ambiguo. No implica abstención ni error técnico.",
+        "not_applicable": "PENDIENTE DE APROBACIÓN: no se declara una representación de no aplicabilidad en la fuente para esta variable."
+      },
+      "normalization_rules": []
+    },
+    {
+      "contract_version": "1.0",
+      "variable_id": "fecha_indice_evento",
+      "version": "1.0.0-draft",
+      "data_type": "date",
+      "categories": [],
+      "operational_definition": "Fecha índice del episodio de exacerbación, preferentemente fecha de inicio, pendiente de decisión clínica definitiva.",
+      "interpretation_rules": [
+        "Usar exclusivamente evidencia documentada y contexto autorizado.",
+        "No inferir exacerbación a partir del diagnóstico de EPOC, medicación crónica o síntomas crónicos aislados.",
+        "Distinguir negación explícita, silencio documental, indeterminación y fallo técnico.",
+        "La evaluación clínica independiente es necesaria antes de congelar el diccionario.",
+        "Usar null cuando no sea posible establecer una fecha válida según el protocolo; no inventar fechas."
+      ],
+      "correctness_criteria": [
+        "PENDIENTE DE APROBACIÓN: preespecificar el criterio de corrección y evaluabilidad de esta variable antes de evaluar desempeño.",
+        "PENDIENTE DE APROBACIÓN: definir evento índice, equivalencia y tolerancia de fechas; no se ha fijado tolerancia alguna."
+      ],
+      "information_policy": {
+        "contract_version": "1.0",
+        "absent": "Usar null cuando no sea posible establecer una fecha válida según el protocolo; no inventar fechas.",
+        "indeterminate": "No inventar una fecha. Usar ausencia de valor cuando no se pueda establecer una fecha válida; causa y evidencia deben registrarse por separado. Falta aprobar su representación detallada.",
+        "not_applicable": "PENDIENTE DE APROBACIÓN: no se declara una representación de no aplicabilidad en la fuente para esta variable."
+      },
+      "normalization_rules": []
+    },
+    {
+      "contract_version": "1.0",
+      "variable_id": "precision_temporal",
+      "version": "1.0.0-draft",
+      "data_type": "categorical",
+      "categories": [
+        "alta",
+        "media",
+        "baja",
+        "indeterminada"
+      ],
+      "operational_definition": "Grado de precisión documental de la fecha índice; criterios cuantitativos pendientes de validación clínica.",
+      "interpretation_rules": [
+        "Usar exclusivamente evidencia documentada y contexto autorizado.",
+        "No inferir exacerbación a partir del diagnóstico de EPOC, medicación crónica o síntomas crónicos aislados.",
+        "Distinguir negación explícita, silencio documental, indeterminación y fallo técnico.",
+        "La evaluación clínica independiente es necesaria antes de congelar el diccionario.",
+        "Categoría alta: Fecha explícita o inequívoca.",
+        "Categoría media: Fecha derivada de referencia temporal concreta, según reglas aprobadas.",
+        "Categoría baja: Fecha aproximada sustentada por evidencia textual, según tolerancia aprobada.",
+        "Categoría indeterminada: No es posible asignar una precisión sustentada."
+      ],
+      "correctness_criteria": [
+        "PENDIENTE DE APROBACIÓN: preespecificar el criterio de corrección y evaluabilidad de esta variable antes de evaluar desempeño."
+      ],
+      "information_policy": {
+        "contract_version": "1.0",
+        "absent": "PENDIENTE DE APROBACIÓN: definir política específica de ausencia documental para esta variable. No inferir valores a partir del silencio; conservar distinción frente a negación explícita.",
+        "indeterminate": "Categoría semántica indeterminada: No es posible asignar una precisión sustentada. No implica abstención ni error técnico.",
+        "not_applicable": "PENDIENTE DE APROBACIÓN: no se declara una representación de no aplicabilidad en la fuente para esta variable."
+      },
+      "normalization_rules": []
+    },
+    {
+      "contract_version": "1.0",
+      "variable_id": "metodo_fecha",
+      "version": "1.0.0-draft",
+      "data_type": "categorical",
+      "categories": [
+        "explicita",
+        "consulta",
+        "consulta_menos_7d",
+        "consulta_menos_15d",
+        "no_determinable"
+      ],
+      "operational_definition": "Procedimiento documental utilizado para determinar fecha_indice_evento.",
+      "interpretation_rules": [
+        "Usar exclusivamente evidencia documentada y contexto autorizado.",
+        "No inferir exacerbación a partir del diagnóstico de EPOC, medicación crónica o síntomas crónicos aislados.",
+        "Distinguir negación explícita, silencio documental, indeterminación y fallo técnico.",
+        "La evaluación clínica independiente es necesaria antes de congelar el diccionario.",
+        "Categoría explicita: Fecha del evento expresada explícitamente en el documento.",
+        "Categoría consulta: Fecha de consulta usada como fecha índice únicamente cuando la regla clínica lo permita.",
+        "Categoría consulta_menos_7d: Fecha derivada de una referencia aproximada de siete días previos, cuando esté documentada.",
+        "Categoría consulta_menos_15d: Fecha derivada de una referencia aproximada de quince días previos, cuando esté documentada.",
+        "Categoría no_determinable: No se puede determinar fecha mediante los métodos permitidos."
+      ],
+      "correctness_criteria": [
+        "PENDIENTE DE APROBACIÓN: preespecificar el criterio de corrección y evaluabilidad de esta variable antes de evaluar desempeño."
+      ],
+      "information_policy": {
+        "contract_version": "1.0",
+        "absent": "PENDIENTE DE APROBACIÓN: definir política específica de ausencia documental para esta variable. No inferir valores a partir del silencio; conservar distinción frente a negación explícita.",
+        "indeterminate": "Categoría semántica no_determinable: No se puede determinar fecha mediante los métodos permitidos. No implica abstención ni error técnico.",
+        "not_applicable": "PENDIENTE DE APROBACIÓN: no se declara una representación de no aplicabilidad en la fuente para esta variable."
+      },
+      "normalization_rules": []
+    }
+  ],
+  "clinically_approved": false,
+  "normalization": [],
+  "consistency_rules": [],
+  "review_rules": [
+    {
+      "contract_version": "1.0",
+      "rule_id": "active_state",
+      "approved": false,
+      "when": {
+        "estado_paciente": {
+          "contract_version": "1.0",
+          "kind": "categorical",
+          "value": "exacerbacion_activa"
+        }
+      },
+      "expected": {
+        "exacerbacion_actual": {
+          "contract_version": "1.0",
+          "kind": "categorical",
+          "value": "true"
+        }
+      }
+    },
+    {
+      "contract_version": "1.0",
+      "rule_id": "date_missing",
+      "approved": false,
+      "when": {
+        "fecha_indice_evento": null
+      },
+      "expected": {
+        "metodo_fecha": {
+          "contract_version": "1.0",
+          "kind": "categorical",
+          "value": "no_determinable"
+        },
+        "precision_temporal": {
+          "contract_version": "1.0",
+          "kind": "categorical",
+          "value": "indeterminada"
+        }
+      }
+    },
+    {
+      "contract_version": "1.0",
+      "rule_id": "no_event_no_date",
+      "approved": false,
+      "when": {
+        "exacerbacion_actual": {
+          "contract_version": "1.0",
+          "kind": "categorical",
+          "value": "false"
+        },
+        "exacerbacion_previa": {
+          "contract_version": "1.0",
+          "kind": "categorical",
+          "value": "false"
+        }
+      },
+      "expected": {
+        "fecha_indice_evento": null
+      }
+    }
+  ]
+}

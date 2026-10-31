@@ -7,6 +7,7 @@ import sys
 from pathlib import Path
 
 SCRIPT = Path(__file__).resolve().parents[1] / "scripts/laboratorio.py"
+TEMPLATE = SCRIPT.parents[1] / "templates/laboratorio"
 
 
 def command(*args: str) -> subprocess.CompletedProcess[str]:
@@ -15,7 +16,7 @@ def command(*args: str) -> subprocess.CompletedProcess[str]:
 
 def make_lab(tmp_path: Path) -> Path:
     lab = tmp_path / "laboratorio"
-    result = command("crear", "--destino", str(lab))
+    result = command("crear", "--destino", str(lab), "--formato", "legado")
     assert result.returncode == 0, result.stderr
     return lab
 
@@ -44,7 +45,14 @@ def test_creates_no_data_or_fabricated_results(tmp_path: Path) -> None:
     for path in lab.rglob("*.jsonl"):
         assert path.read_bytes() == b""
     for path in (lab / "01_especificacion/prompts").glob("*.txt"):
-        assert path.read_bytes() == b""
+        if path.name == "extractor_v1.txt":
+            # Versioned technical instructions are shipped; no model has been executed.
+            assert (
+                path.read_bytes()
+                == (TEMPLATE / "01_especificacion/prompts/extractor_v1.txt").read_bytes()
+            )
+        else:
+            assert path.read_bytes() == b""
     for path in lab.rglob("*.csv"):
         if path.name not in {"estado_etapas.csv", "lista_chequeo.csv"}:
             assert read_rows(path) == [], path
@@ -58,13 +66,13 @@ def test_creates_no_data_or_fabricated_results(tmp_path: Path) -> None:
 def test_refuses_to_overwrite_any_existing_destination(tmp_path: Path) -> None:
     lab = make_lab(tmp_path)
     files = {p.relative_to(lab): p.read_bytes() for p in lab.rglob("*") if p.is_file()}
-    second = command("crear", "--destino", str(lab))
+    second = command("crear", "--destino", str(lab), "--formato", "legado")
     assert second.returncode == 2
     assert "no se sobrescribe" in second.stderr
     assert files == {p.relative_to(lab): p.read_bytes() for p in lab.rglob("*") if p.is_file()}
     empty = tmp_path / "empty"
     empty.mkdir()
-    assert command("crear", "--destino", str(empty)).returncode == 2
+    assert command("crear", "--destino", str(empty), "--formato", "legado").returncode == 2
     assert list(empty.iterdir()) == []
 
 
@@ -111,6 +119,7 @@ def test_rejects_missing_empty_or_external_evidence(tmp_path: Path) -> None:
     update(path, "E1.01", "evidencia_real", "no_existe.md", key="id")
     assert command("estado", "--laboratorio", str(lab)).returncode == 1
     update(path, "E1.01", "evidencia_real", "01_especificacion/prompts/extractor_v1.txt", key="id")
+    (lab / "01_especificacion/prompts/extractor_v1.txt").write_text("")
     result = command("estado", "--laboratorio", str(lab))
     assert result.returncode == 1 and "está vacía" in result.stdout
 

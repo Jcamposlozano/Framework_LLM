@@ -1,0 +1,13 @@
+{
+  "estado": "pendiente",
+  "nota": "Sin resultados científicos; completar únicamente con evidencia real.",
+  "pares_evaluables": [],
+  "pgec_A": null,
+  "pgec_B": null,
+  "diferencia_pareada": null,
+  "ic95": null,
+  "por_variable": [],
+  "transiciones_errores": [],
+  "cobertura": null,
+  "conclusiones": null
+}

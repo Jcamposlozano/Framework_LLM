@@ -1,0 +1,9 @@
+organizacion: YAML para editar planes; JSON para documentos, contratos y resultados.
+empezar_por: 01_especificacion/especificacion.yaml
+fuente_unica_especificacion: YAML
+json_especificacion: Generado por el comando preparar-especificacion; no editar manualmente.
+textos: datos/documentos.json; registros Document con text y saltos de línea conservados.
+estado: control/estado.json; actualizar manualmente con evidencias.
+alcance: Crear la estructura no ejecuta modelos ni estadísticas. La fase 2 se prepara mediante preparar-verificacion.
+agrupacion: No asumir que un identificador de ingreso sea el paciente.
+guia: docs/laboratorio-yaml-json.md en el repositorio del framework.

@@ -4,20 +4,24 @@ build-backend = "hatchling.build"
 
 [project]
 name = "extracteval"
-version = "0.1.0"
+version = "0.2.0"
 description = "Domain-neutral contracts for evaluating structured document extractions"
 readme = "README.md"
 requires-python = ">=3.11"
 dependencies = ["pydantic>=2.10,<3"]
 
+[project.scripts]
+extracteval = "extracteval.cli:main"
+
 [project.optional-dependencies]
-dev = ["build>=1.2,<2", "pytest>=8,<10", "ruff>=0.9,<1", "mypy>=1.14,<2", "hatchling>=1.26,<2"]
+lab = ["PyYAML>=6,<7", "openpyxl>=3.1,<4"]
+dev = ["build>=1.2,<2", "pytest>=8,<10", "ruff>=0.9,<1", "mypy>=1.14,<2", "hatchling>=1.26,<2", "PyYAML>=6,<7", "types-PyYAML>=6,<7", "openpyxl>=3.1,<4"]
 
 [tool.hatch.build.targets.wheel]
 packages = ["src/extracteval"]
 
 [tool.hatch.build.targets.sdist]
-include = ["/src", "/tests", "/examples", "/docs", "/README.md", "/CHANGELOG.md", "/pyproject.toml", "/requirements-dev.lock", "/scripts", "/templates"]
+include = ["/src", "/tests", "/examples", "/docs", "/configs", "/prompts", "/README.md", "/CHANGELOG.md", "/pyproject.toml", "/requirements-dev.lock", "/scripts", "/templates"]
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]

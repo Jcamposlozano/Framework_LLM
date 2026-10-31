@@ -1,0 +1,12 @@
+objetivo_correccion:
+particion_entrenamiento:
+particion_calibracion:
+particion_final:
+senales: []
+metodo:
+comparador:
+metodo_calibracion:
+politica_uso:
+umbrales_predefinidos:
+capacidad_revision:
+criterios_datos_insuficientes:
