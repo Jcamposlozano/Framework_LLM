@@ -7,6 +7,13 @@ Paquete Python independiente para extracción documental y su futura evaluación
 La [auditoría ejecutable](docs/auditoria-integracion-2026-10-31.md) distingue integración
 técnica de validación científica. El modo predeterminado sigue siendo **mock**.
 
+Para una única extracción A con la nota inventada `demo-extractor-epoc-001`, existe
+[autorización personal de desarrollo sintético](docs/primera-extraccion-personal-sintetica.md).
+Verifica el documento completo contra un hash fijado en el código y exige consentimiento
+explícito; no requiere afirmar autorización institucional. Las notas clínicas reales,
+anonimizadas o seudonimizadas conservan los controles institucionales existentes.
+La ruta personal se probó con transporte simulado, sin llamadas reales.
+
 | Estado | Alcance |
 |---|---|
 | Implementado | Contratos, extracción A, verificación V independiente, comparación determinista, reconciliación conservadora B, persistencia inmutable, hashes y reanudación; piloto de estabilidad completo y con A fija. |

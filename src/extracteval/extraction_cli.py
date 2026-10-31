@@ -9,7 +9,7 @@ from typing import Literal, cast
 from extracteval.adapters.models.openai import OpenAIHTTPTransport, OpenAIResponsesModel
 from extracteval.adapters.models.verification_mock import MockExtractorModel
 from extracteval.adapters.storage.json_store import JSONRunStore
-from extracteval.application.configuration import GovernanceAuthorization
+from extracteval.application.authorization import load_extraction_authorization
 from extracteval.application.extraction import extract_document, load_extractor
 from extracteval.core.documents import Document
 from extracteval.core.hashing import content_hash
@@ -57,10 +57,9 @@ def main(argv: list[str]) -> int:
             if mode == "real":
                 if not args.authorize_real or args.governance is None:
                     raise ValueError("Real extraction requires authorization")
-                governance = GovernanceAuthorization.model_validate_json(
-                    args.governance.read_bytes()
+                governance = load_extraction_authorization(
+                    args.governance, document, settings.model
                 )
-                governance.validate_authorization(content_hash(document))
                 model = OpenAIResponsesModel(
                     settings.model,
                     OpenAIHTTPTransport(os.environ.get("OPENAI_API_KEY", "")),

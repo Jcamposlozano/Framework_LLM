@@ -1,5 +1,11 @@
 # Extractor A e integración documental A → V → B
 
+La [guía de extracción personal sintética](primera-extraccion-personal-sintetica.md)
+documenta la autorización adicional limitada al fixture verificable
+`demo-extractor-epoc-001`. Conserva el modo institucional para documentos clínicos y
+no habilita llamadas por defecto. El resto de este documento describe la integración
+y los controles institucionales de la entrega original.
+
 Implementado el 19 de octubre de 2026. Pruebas exclusivamente sintéticas: no se han
 procesado las 5.924 notas del estudio ni realizado llamadas a OpenAI. La configuración
 implementada no equivale a validación científica ni autoriza evaluación confirmatoria.
