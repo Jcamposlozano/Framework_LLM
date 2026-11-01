@@ -87,10 +87,14 @@ def prepare_extraction(laboratory: Path, version: str = "v1") -> Path:
     _, dictionary, _, _ = load_configuration(verifier_root / "config.json", {}, "mock")
     root = extraction_root(laboratory, version)
     root.mkdir(parents=True, exist_ok=True)
-    prompt = (
-        REPOSITORY / "templates/laboratorio/01_especificacion/prompts/extractor_v1.txt"
-    ).read_bytes()
-    prompt_path = root / "extractor_v1.txt"
+    if (root / "config.json").exists():
+        existing = ExtractorSettings.model_validate_json((root / "config.json").read_bytes())
+        if existing.prompt_version != "clinical-extractor.v2":
+            raise LabError(
+                "El prompt A está versionado; crea otro laboratorio o versión explícita."
+            )
+    prompt = (REPOSITORY / "prompts/clinical-extractor.v2.txt").read_bytes()
+    prompt_path = root / "extractor_v2.txt"
     if prompt_path.exists() and prompt_path.read_bytes() != prompt:
         raise LabError("El prompt A cambió; prepara otra versión.")
     if not prompt_path.exists():
@@ -103,8 +107,8 @@ def prepare_extraction(laboratory: Path, version: str = "v1") -> Path:
         version="lab-extractor-" + version,
         dictionary_path=os.path.relpath(verifier_root / "diccionario.json", root),
         dictionary=dictionary.artifact,
-        prompt_path="extractor_v1.txt",
-        prompt_version="clinical-extractor.v1",
+        prompt_path="extractor_v2.txt",
+        prompt_version="clinical-extractor.v2",
         prompt_sha256=hashlib.sha256(prompt).hexdigest(),
         mock_payload_path="demo-respuesta.json",
     )

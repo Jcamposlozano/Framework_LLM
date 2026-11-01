@@ -1,5 +1,11 @@
 # Extractor A e integración documental A → V → B
 
+Las nuevas preparaciones usan `clinical-extractor.v2`, con una
+[representación explícita de fechas desconocidas](correccion-fecha-desconocida.md).
+El prompt v1, sus hashes y las ejecuciones históricas se conservan; no se actualizan
+laboratorios existentes automáticamente. Las referencias v1 más abajo documentan
+la entrega original.
+
 La [guía de extracción personal sintética](primera-extraccion-personal-sintetica.md)
 documenta la autorización adicional limitada al fixture verificable
 `demo-extractor-epoc-001`. Conserva el modo institucional para documentos clínicos y

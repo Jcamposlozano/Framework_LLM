@@ -7,6 +7,7 @@ from pathlib import Path
 
 import pytest
 import yaml
+from pydantic import ValidationError
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "scripts"))
 from extraccion_laboratorio import (  # noqa: E402
@@ -119,27 +120,132 @@ def test_six_values_null_negation_evidence_and_trace(setup_a, tmp_path):
     assert json.loads(model.requests[0].content)["document"]["provenance"] == {}
 
 
+def test_zero_year_date_response_is_rejected_without_silent_repair(setup_a, tmp_path):
+    _, _, settings, dictionary, prompt, document, fixture = setup_a
+    assert "Fecha de inicio desconocida" in document.text
+    raw = fixture.model_dump(mode="json")
+    date_item = next(v for v in raw["variables"] if v["variable_id"] == "fecha_indice_evento")
+    date_item.update(proposed_value={"kind": "date", "value": "0000-01-01"}, semantic_state="value")
+    serialized = json.dumps(raw)
+    with pytest.raises(ValidationError) as error:
+        VerificationPayload.model_validate_json(serialized)
+    assert any(e["type"] == "date_parsing" for e in error.value.errors(include_input=False))
+
+    class Transport:
+        def request(self, method, path, payload, timeout):
+            if method == "GET":
+                return {"id": "gpt-4.1-mini"}
+            assert path == "responses"
+            return {
+                "id": "synthetic-zero-year-response",
+                "status": "completed",
+                "model": "gpt-4.1-mini-2025-04-14",
+                "output": [
+                    {"type": "message", "content": [{"type": "output_text", "text": serialized}]}
+                ],
+                "usage": {"input_tokens": 100, "output_tokens": 60},
+            }
+
+    execution = extract_document(
+        document,
+        dictionary,
+        settings,
+        prompt,
+        OpenAIResponsesModel(settings.model, Transport(), max_retries=0),
+        JSONRunStore(tmp_path / "zero-year"),
+        mode="real",
+    )
+    assert execution.audit.error.code == "invalid_response"
+    assert execution.audit.response.model.model_id == "gpt-4.1-mini-2025-04-14"
+    assert execution.audit.response.usage.output_tokens == 60
+    assert "0000-01-01" in execution.audit.response.structured_json
+    assert execution.extraction_a.semantic_states == {}
+    assert all(
+        r.technical_error.code == "invalid_response" and r.value is None
+        for r in execution.extraction_a.results
+    )
+
+
+def test_unknown_date_null_preserves_five_other_variables_and_flows_to_B(setup_a, tmp_path):
+    lab, _, settings, dictionary, prompt, document, fixture = setup_a
+    assert "Fecha de inicio desconocida" in document.text
+    assert settings.prompt_version == "clinical-extractor.v2"
+    assert 'proposed_value: null y semantic_state: "indeterminate"' in prompt
+    assert all(sentinel in prompt for sentinel in ("0000-01-01", "1900-01-01"))
+    execution, _, store = run_a(setup_a, tmp_path)
+    assert execution.audit.error is None
+    proposals = {v.variable_id: v for v in fixture.variables}
+    for result in execution.extraction_a.results:
+        key = result.trace.variable_id
+        assert result.value == proposals[key].proposed_value
+        assert execution.extraction_a.semantic_states[key] == proposals[key].semantic_state
+        assert result.technical_error is None
+    date_result = next(
+        r for r in execution.extraction_a.results if r.trace.variable_id == "fecha_indice_evento"
+    )
+    assert date_result.value is None and date_result.abstention is None
+    assert execution.extraction_a.semantic_states["fecha_indice_evento"] == "indeterminate"
+    _, _, policy, verifier_config = load_configuration(
+        lab / "configuraciones/verificacion/v1/config.json", {}, "mock"
+    )
+    original_bytes = (store.root / "extraction_a.json").read_bytes()
+    output = JSONRunStore(tmp_path / "unknown-date-vb")
+    manifest = run_verification(
+        VerificationInput(document=document, extraction_a=execution.extraction_a),
+        dictionary,
+        policy,
+        verifier_config,
+        output,
+        IndependentVerifier(MockVerifierModel([fixture])),
+    )
+    assert manifest.status == "completed"
+    b = output.get("extraction_b", ReconciledExtraction)
+    assert len(b.decisions) == 6
+    for decision in b.decisions:
+        key = decision.variable_id
+        assert decision.resulting_value == proposals[key].proposed_value
+        assert decision.resulting_state == proposals[key].semantic_state
+    assert (store.root / "extraction_a.json").read_bytes() == original_bytes
+
+
+def test_prepare_v2_does_not_migrate_or_overwrite_a_v1_configuration(setup_a):
+    lab, config, settings, _, _, _, _ = setup_a
+    original_prompt = ROOT / "templates/laboratorio/01_especificacion/prompts/extractor_v1.txt"
+    historical = settings.model_dump(mode="json") | {
+        "prompt_path": "extractor_v1.txt",
+        "prompt_version": "clinical-extractor.v1",
+        "prompt_sha256": hashlib.sha256(original_prompt.read_bytes()).hexdigest(),
+    }
+    config.write_text(json.dumps(historical))
+    (config.parent / "extractor_v1.txt").write_bytes(original_prompt.read_bytes())
+    before = {p.relative_to(lab): p.read_bytes() for p in lab.rglob("*") if p.is_file()}
+    with pytest.raises(LabError, match="crea otro laboratorio"):
+        prepare_extraction(lab)
+    assert before == {p.relative_to(lab): p.read_bytes() for p in lab.rglob("*") if p.is_file()}
+
+
 def changed_payload(setup_a, key, **updates):
     raw = setup_a[6].model_dump(mode="json")
     next(v for v in raw["variables"] if v["variable_id"] == key).update(updates)
     return VerificationPayload.model_validate_json(json.dumps(raw))
 
 
-def test_explicit_date_preserved(setup_a, tmp_path):
+@pytest.mark.parametrize("date_text", ["2024-01-03", "1900-01-01"])
+def test_explicit_date_preserved(setup_a, tmp_path, date_text):
     fixture = list(setup_a)
     document = setup_a[5]
-    text = document.text.replace("Fecha de inicio desconocida.", "Fecha de inicio: 2024-01-03.")
+    text = document.text.replace("Fecha de inicio desconocida.", f"Fecha de inicio: {date_text}.")
     fixture[5] = document.model_copy(
         update={
             "text": text,
             "sections": (DocumentSection(name="analisis", start=0, end=len(text)),),
         }
     )
-    quote = "Fecha de inicio: 2024-01-03."
+    quote = f"Fecha de inicio: {date_text}."
     payload = changed_payload(
         setup_a,
         "fecha_indice_evento",
-        proposed_value={"kind": "date", "value": "2024-01-03"},
+        proposed_value={"kind": "date", "value": date_text},
         semantic_state="value",
         evidence=[
             {
@@ -158,7 +264,7 @@ def test_explicit_date_preserved(setup_a, tmp_path):
         for r in execution.extraction_a.results
         if r.trace.variable_id == "fecha_indice_evento"
     )
-    assert value.model_dump(mode="json")["value"] == "2024-01-03"
+    assert value.model_dump(mode="json")["value"] == date_text
 
 
 def test_abstention_is_separate_from_indetermination(setup_a, tmp_path):
@@ -317,7 +423,7 @@ def test_independent_settings_and_prompt_integrity(setup_a):
     assert changed.model == settings.model
     changed, _, _ = load_extractor(config, {"EXTRACTEVAL_EXTRACTOR_MODEL": "gpt-4.1-mini"})
     assert changed.model == "gpt-4.1-mini"
-    prompt_path = config.parent / "extractor_v1.txt"
+    prompt_path = config.parent / settings.prompt_path
     prompt_path.write_text("alterado")
     with pytest.raises(ValueError, match="prompt integrity"):
         load_extractor(config, {})
