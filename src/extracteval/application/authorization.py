@@ -23,16 +23,23 @@ class PersonalSyntheticAuthorization(Contract):
     fixture_id: Literal["extracteval.demo-extractor-epoc.v1"]
     document_id: Literal["demo-extractor-epoc-001"]
     document_hash: Digest
-    operation: Literal["extract_a"]
+    operation: Literal["extract_a", "verify_v"]
     provider: Literal["openai"]
     model_id: Literal["gpt-4.1-mini"]
     external_calls_authorized: StrictBool
     verification_method: Literal["bundled_fixture_sha256"] = "bundled_fixture_sha256"
 
-    def validate_document(self, document: Document, model_id: str) -> None:
+    def validate_document(
+        self,
+        document: Document,
+        model_id: str,
+        *,
+        operation: Literal["extract_a", "verify_v"] = "extract_a",
+    ) -> None:
         actual_hash = content_hash(document)
         if (
             not self.external_calls_authorized
+            or self.operation != operation
             or self.model_id != model_id
             or document.document_id != self.document_id
             or actual_hash != DEMO_DOCUMENT_SHA256
@@ -44,15 +51,25 @@ class PersonalSyntheticAuthorization(Contract):
 def load_extraction_authorization(
     path: Path, document: Document, model_id: str
 ) -> GovernanceAuthorization | PersonalSyntheticAuthorization:
-    """Personal consent applies only to A; V and stability retain institutional gates.
+    """Require A-specific consent; V consent cannot authorize A."""
+    return _load_authorization(path, document, model_id, "extract_a")
 
-    Legacy institutional files deliberately retain their existing format and validator.
-    Unknown modes and mixed institutional/personal fields fail closed.
-    """
+
+def load_verification_authorization(
+    path: Path, document: Document, model_id: str
+) -> GovernanceAuthorization | PersonalSyntheticAuthorization:
+    """Require separate V-specific consent for the same pinned synthetic fixture."""
+    return _load_authorization(path, document, model_id, "verify_v")
+
+
+def _load_authorization(
+    path: Path, document: Document, model_id: str, operation: Literal["extract_a", "verify_v"]
+) -> GovernanceAuthorization | PersonalSyntheticAuthorization:
+    # Legacy institutional files and stability authorization remain unchanged.
     raw = json.loads(path.read_bytes())
     if isinstance(raw, dict) and raw.get("mode") == "personal_synthetic_development":
         personal = PersonalSyntheticAuthorization.model_validate(raw)
-        personal.validate_document(document, model_id)
+        personal.validate_document(document, model_id, operation=operation)
         return personal
     institutional = GovernanceAuthorization.model_validate(raw)
     institutional.validate_authorization(content_hash(document))

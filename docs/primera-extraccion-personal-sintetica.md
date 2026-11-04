@@ -27,8 +27,13 @@ inventado incluido en el proyecto.
 
 Las notas clínicas reales, anonimizadas o seudonimizadas siguen usando
 `GovernanceAuthorization`, con sus cinco comprobaciones institucionales y hash
-vinculado al documento. Su formato anterior no cambia. El modo personal no autoriza
-V, estabilidad, otro modelo, otros documentos ni procesamiento de un corpus.
+vinculado al documento. Su formato anterior no cambia. La autorización `extract_a`
+de esta guía no autoriza V, estabilidad, otro modelo, otros documentos ni un corpus.
+
+Para continuar desde una A real guardada, consulta el
+[piloto local completo A → V → B](piloto-sintetico-avb-local.md). Introduce un
+consentimiento separado `verify_v`; la autorización `extract_a` de esta guía sigue
+sin autorizar V ni estabilidad.
 
 La autorización personal exige el booleano JSON `external_calls_authorized: true` y,
 además, el CLI exige `--mode real --authorize-real --governance ...`. Falta de
@@ -212,7 +217,7 @@ modos desconocidos y mezcla de campos. Incluye escenarios inventados clasificado
 como clínicos reales, anonimizados y seudonimizados; no usa historias clínicas.
 Se prueba el CLI personal y el institucional con transporte sustituido, tokens,
 modelo efectivo, auditoría, persistencia y reanudación, así como el rechazo antes de
-construir transporte y la imposibilidad de usar el modo personal para V.
+construir transporte y la imposibilidad de usar el consentimiento `extract_a` para V.
 
 La batería completa bloquea conexiones de red. Las seis variables, prompts,
 reconciliación y artefactos científicos previos permanecen sin cambios.
