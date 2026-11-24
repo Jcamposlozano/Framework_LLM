@@ -29,7 +29,8 @@ mi_estudio_001/
 │   └── especificacion.json            # Generado desde el YAML
 ├── 02_diseno/
 │   ├── diseno.yaml
-│   └── resultados.json
+│   ├── resultados.json
+│   └── caracterizacion-documental.json   # Se genera bajo demanda
 ├── 03_estabilidad/
 │   ├── estabilidad.yaml
 │   └── resultados.json
@@ -171,6 +172,92 @@ Desde la raíz de Framework:
 El laboratorio debe existir y su lista de documentos debe estar vacía. Si ya hay documentos, el comando se detiene: no los reemplaza ni agrega nuevos silenciosamente. Para la carga actual no es necesario ejecutar otra vez este comando.
 
 El lector admite el TSV declarado y XLSX con mapeo explícito de hoja, columnas y fecha. Consulta [Importación desde Excel](importacion-excel.md). Otros formatos requieren su propio lector. No detecta automáticamente qué identificador representa a una persona.
+
+## E2. Caracterizar los documentos antes del muestreo
+
+Desde la raíz de Framework, en el equipo que contiene el corpus del estudio:
+
+```bash
+.venv/bin/python scripts/laboratorio.py caracterizar-documentos \
+  --laboratorio laboratorios/mi_estudio_001
+```
+
+El comando usa únicamente `datos/documentos.json` y valida la lista con el contrato
+`Document`. Funciona localmente, sin diccionario clínico, anotaciones, modelos ni
+salidas de extracción. Escribe `02_diseno/caracterizacion-documental.json`, con
+indicadores por documento, recuentos de calidad, mínimo, cuartiles, mediana, máximo y
+cantidad de valores definidos por indicador. Conserva el corpus, `diseno.yaml`,
+`resultados.json` y los experimentos. No selecciona documentos ni fija particiones.
+Para conservar informes con distintas opciones usa un nombre nuevo con
+`--informe otro-informe.json`. El comando rechaza sobrescrituras.
+
+### Cómo se miden los indicadores
+
+- **Integridad.** El SHA-256 del contrato usa JSON canónico. El SHA-256 textual usa
+  exactamente el texto en UTF-8, incluidos espacios, mayúsculas y saltos de línea.
+  Dos documentos tienen el mismo grupo de duplicados cuando sus textos exactos
+  coinciden. Se cuentan los miembros y los grupos, sin eliminar registros.
+  Un texto vacío, uno compuesto solo por espacio en blanco y una referencia sin
+  texto local se distinguen. Los indicios de codificación son el carácter de
+  reemplazo U+FFFD, U+FEFF y caracteres de control salvo tabulación y saltos de
+  línea. Estos indicios no diagnostican por sí solos un problema de codificación.
+- **Longitud y diversidad.** Una palabra es una secuencia alfanumérica Unicode con
+  al menos una letra, después de aplicar NFC y `casefold`. Guiones, apóstrofos y
+  otros separadores cortan secuencias. La medida describe el texto y depende de su
+  sistema de escritura: no tokeniza palabras de un LLM ni segmenta idiomas que no
+  las separan gráficamente. La longitud de palabra se mide sobre esas secuencias.
+  TTR es tipos únicos dividido por palabras; la proporción de repeticiones cuenta
+  ocurrencias posteriores a la primera aparición de cada tipo. MATTR promedia el
+  TTR de ventanas consecutivas de igual longitud que avanzan una palabra cada vez.
+  `--ventana-mattr` cambia el valor predeterminado de 50. Si el texto tiene menos
+  palabras que la ventana, MATTR es `null`. Los cocientes sin denominador también
+  son `null`. Se evaluó MTLD y se dejó fuera de esta versión: en notas cortas su
+  interpretación exige fijar y validar reglas adicionales para segmentos parciales
+  y casos donde no se alcanza el umbral.
+- **Estructura.** Las líneas siguen `str.splitlines()`; los párrafos se separan por
+  líneas vacías. Se estiman oraciones con signos de cierre o saltos de línea,
+  contando los segmentos con palabras. Las abreviaturas, puntos decimales y
+  cortes no convencionales pueden alterar esa estimación. Se cuentan líneas con
+  viñetas o enumeraciones, secciones declaradas, y signos de puntuación de un
+  conjunto fijo más un total residual. La proporción de mayúsculas usa como
+  denominador los caracteres con distinción de caja.
+- **Composición.** Los caracteres se cuentan como puntos de código Unicode.
+  Las proporciones numérica, alfabética y especial dividen por todos los caracteres
+  originales. «Especial» incluye las categorías Unicode de símbolo y puntuación.
+  Las expresiones numéricas usan dígitos decimales, signo opcional y separadores
+  de coma o punto. Las fechas y horas son coincidencias superficiales como
+  `2026-11-24`, `24/11/2026` y `09:30`. Se cuentan por separado y pueden
+  solaparse con expresiones numéricas. No se comprueba validez de calendario
+  ni se interpreta qué evento describen.
+
+### Escenarios ilustrativos
+
+El informe compara la precisión nominal en un muestreo aleatorio simple de
+**documentos** sin reemplazo. Usa una aproximación normal y corrección por población
+finita. Por defecto usa 95 % de confianza y márgenes de ±3, ±5 y ±7 puntos
+porcentuales. Cambia el nivel con `--confianza 0.95` y repite `--margen` para los
+márgenes deseados, expresados como fracciones.
+
+Se compara una proporción global con \(p=0.5\) y una diferencia binaria emparejada
+bajo discordancias hipotéticas de 10 %, 25 % y 50 %. En el segundo caso, la variable
+por documento puede valer −1, 0 o +1 y se usa varianza \(q-\Delta^2\) con
+\(\Delta=0\) para cada discordancia supuesta \(q\). El tamaño ilustrativo es
+\(\lceil N z^2 v / [(N-1)e^2 + z^2 v]\rceil\), con población \(N\),
+margen \(e\), cuantil normal \(z\) y varianza supuesta \(v\).
+Para 5.924 documentos, 95 % y ±5 puntos, la proporción global requiere **361**
+bajo esos supuestos. Estos escenarios no calculan potencia para el contraste PGEC
+ni incorporan agrupación por paciente, pérdidas de evaluabilidad o precisión por
+categoría. La aprobación del diseño y la selección de la muestra siguen en E2.
+
+### Manejo local del informe
+
+El informe guarda la huella del archivo fuente, la versión del método y de Unicode,
+y los parámetros. Incluye identificadores documentales seudonimizados, huellas y
+estadísticas, pero no copia narrativas, términos, metadatos de procedencia ni
+referencias a texto externo. Se escribe con permisos privados y debe mantenerse
+en el laboratorio local. Usa `--incluir-entidades-autorizadas` solo si ya existen
+identificadores de entidad seudonimizados y están autorizados para ese uso.
+El comando nunca los deriva del texto ni de los identificadores de ingreso.
 
 ## 5. Identificadores, privacidad y agrupación
 

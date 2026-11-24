@@ -12,7 +12,11 @@ from pydantic import ValidationError
 from extracteval.adapters.models.openai import OpenAIHTTPTransport, OpenAIResponsesModel
 from extracteval.adapters.models.verification_mock import MockVerifierModel
 from extracteval.adapters.storage.json_store import JSONRunStore
-from extracteval.application.configuration import GovernanceAuthorization, load_configuration
+from extracteval.application.authorization import (
+    PersonalSyntheticAuthorization,
+    load_verification_authorization,
+)
+from extracteval.application.configuration import load_configuration
 from extracteval.application.pipeline import run_verification
 from extracteval.application.verification import IndependentVerifier, independent_request
 from extracteval.core.hashing import content_hash
@@ -80,8 +84,9 @@ def main(argv: list[str] | None = None) -> int:
         if network_needed:
             if not args.authorize_real or args.governance is None:
                 raise ValueError("Real calls require --authorize-real and --governance")
-            governance = GovernanceAuthorization.model_validate_json(args.governance.read_bytes())
-            governance.validate_authorization(content_hash(inputs.document))
+            governance = load_verification_authorization(
+                args.governance, inputs.document, verifier_config.model_id
+            )
         verifier = None
         if stage in ("all", "independent") and not (args.output / "verification.json").exists():
             if mode == "mock":
@@ -90,7 +95,13 @@ def main(argv: list[str] | None = None) -> int:
             else:
                 transport = OpenAIHTTPTransport(os.environ.get("OPENAI_API_KEY", ""))
                 verifier = IndependentVerifier(
-                    OpenAIResponsesModel(verifier_config.model_id, transport)
+                    OpenAIResponsesModel(
+                        verifier_config.model_id,
+                        transport,
+                        max_retries=0
+                        if isinstance(governance, PersonalSyntheticAuthorization)
+                        else 2,
+                    )
                 )
         store = JSONRunStore(args.output)
         if governance is not None:

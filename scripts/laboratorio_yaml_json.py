@@ -7,13 +7,14 @@ import io
 import json
 import os
 import secrets
+from collections.abc import Sequence
 from datetime import UTC, datetime
 from pathlib import Path
 from typing import Any
 from uuid import uuid4
 
 from diseno_validaciones import ACTIONS, DesignError, assess_design, require_operation
-from pydantic import ValidationError
+from pydantic import TypeAdapter, ValidationError
 
 from extracteval.core.base import ArtifactRef
 from extracteval.core.documents import Document
@@ -252,6 +253,48 @@ def check_design(laboratory: Path, action: str) -> None:
         print(f"{item['id']}: {item['motivo']}")
     print(f"{action}: bloqueada; sin autorización operativa ni ejecutor en esta fase.")
     require_operation(assessment, action)
+
+
+def characterize_design_corpus(
+    laboratory: Path,
+    *,
+    filename: str,
+    mattr_window: int,
+    confidence: float,
+    margins: Sequence[float],
+    include_entity_ids: bool,
+) -> None:
+    from extracteval.application.document_characterization import (
+        characterize_documents,
+        sampling_scenarios,
+    )
+
+    if Path(filename).name != filename or Path(filename).suffix != ".json":
+        raise LabError("Indica un nombre de archivo .json dentro de 02_diseno.")
+    if filename == "resultados.json":
+        raise LabError("Usa un informe separado del archivo de resultados E2.")
+    output = laboratory / "02_diseno" / filename
+    if output.exists():
+        raise LabError("El informe ya existe; elige otro nombre con --informe.")
+    source_path = "datos/documentos.json"
+    source = (laboratory / source_path).read_bytes()
+    try:
+        documents = TypeAdapter(list[Document]).validate_json(source)
+    except ValidationError:
+        raise LabError("El corpus no cumple el contrato documental.") from None
+
+    scenarios = sampling_scenarios(len(documents), confidence=confidence, margins=margins)
+    profile = characterize_documents(
+        documents, mattr_window=mattr_window, include_entity_ids=include_entity_ids
+    )
+    report = {
+        "source": {"path": source_path, "sha256": hashlib.sha256(source).hexdigest()},
+        **profile,
+        "sampling_scenarios": scenarios,
+    }
+    write_json(output, report, exclusive=True, private=True)
+    print(f"Caracterización local guardada en 02_diseno/{filename}.")
+    print(f"Documentos caracterizados: {len(documents)}. No se seleccionó ninguna muestra.")
 
 
 def prepare_design(laboratory: Path) -> None:

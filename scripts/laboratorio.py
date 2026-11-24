@@ -153,6 +153,19 @@ def main() -> None:
         "preparar-diseno", help="Registrar el plan YAML sin calcular estadísticas"
     )
     design.add_argument("--laboratorio", type=Path, required=True)
+    characterize = subparsers.add_parser(
+        "caracterizar-documentos", help="Perfilar el corpus local y comparar escenarios de E2"
+    )
+    characterize.add_argument("--laboratorio", type=Path, required=True)
+    characterize.add_argument("--informe", default="caracterizacion-documental.json")
+    characterize.add_argument("--ventana-mattr", type=int, default=50)
+    characterize.add_argument("--confianza", type=float, default=0.95)
+    characterize.add_argument("--margen", type=float, action="append")
+    characterize.add_argument(
+        "--incluir-entidades-autorizadas",
+        action="store_true",
+        help="Incluir únicamente entity_id preexistentes y autorizados para este informe local",
+    )
     check = subparsers.add_parser(
         "validar-diseno", help="Comprobar bloqueos sin ejecutar el estudio"
     )
@@ -345,6 +358,7 @@ def main() -> None:
                 raise SystemExit(1)
         else:
             from laboratorio_yaml_json import (
+                characterize_design_corpus,
                 check_design,
                 create_simple,
                 import_documents,
@@ -359,6 +373,15 @@ def main() -> None:
                 prepare_specification(args.laboratorio)
             elif args.command == "preparar-diseno":
                 prepare_design(args.laboratorio)
+            elif args.command == "caracterizar-documentos":
+                characterize_design_corpus(
+                    args.laboratorio,
+                    filename=args.informe,
+                    mattr_window=args.ventana_mattr,
+                    confidence=args.confianza,
+                    margins=args.margen if args.margen is not None else [0.03, 0.05, 0.07],
+                    include_entity_ids=args.incluir_entidades_autorizadas,
+                )
             elif args.command == "validar-diseno":
                 check_design(args.laboratorio, args.accion)
             elif args.command == "importar-textos":

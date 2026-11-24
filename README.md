@@ -14,6 +14,11 @@ explícito; no requiere afirmar autorización institucional. Las notas clínicas
 anonimizadas o seudonimizadas conservan los controles institucionales existentes.
 La ruta personal se probó con transporte simulado, sin llamadas reales.
 
+Para continuar desde una A real local ya guardada, usa el
+[procedimiento A → V → B](docs/piloto-sintetico-avb-local.md): preserva A, informa
+las posiciones candidatas de evidencia sin alterar el original y exige un
+consentimiento personal específico `verify_v` para enviar V.
+
 | Estado | Alcance |
 |---|---|
 | Implementado | Contratos, extracción A, verificación V independiente, comparación determinista, reconciliación conservadora B, persistencia inmutable, hashes y reanudación; piloto de estabilidad completo y con A fija. |
