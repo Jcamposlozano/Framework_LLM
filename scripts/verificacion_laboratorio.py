@@ -27,6 +27,7 @@ from extracteval.core.specification import (
 )
 from extracteval.core.verification import (
     ExtractionSnapshot,
+    ReconciliationPolicy,
     VariableVerification,
     VerificationInput,
     VerificationPayload,
@@ -126,7 +127,9 @@ def synthetic_inputs(
     )
 
 
-def prepare_verification(laboratory: Path, version: str = "v1") -> None:
+def prepare_verification(
+    laboratory: Path, version: str = "v1", *, regla_b_ficha: bool = False
+) -> None:
     source = laboratory / "01_especificacion/especificacion.yaml"
     compiled = read_json(laboratory / "01_especificacion/especificacion.json")
     source_hash = hashlib.sha256(source.read_bytes()).hexdigest()
@@ -140,7 +143,21 @@ def prepare_verification(laboratory: Path, version: str = "v1") -> None:
         raise LabError(
             "Diccionario del laboratorio incompatible; prepara la especificación."
         ) from None
-    # Conserva variables, categorías y reglas descriptivas. La aprobación clínica no se infiere.
+    policy_file = "negacion-explicita.v1.json" if regla_b_ficha else "conservative.v1.json"
+    policy_data = read_json(REPOSITORY / "configs/epoc" / policy_file)
+    policy = ReconciliationPolicy.model_validate(policy_data)
+    for replacement in policy.replacement_rules:
+        original.variable(replacement.variable_id).validate_value(replacement.proposed_value)
+        if not replacement.approved:
+            raise LabError("El perfil de reemplazo contiene una regla sin aprobación.")
+    prompt = (REPOSITORY / "prompts/independent-verifier.v1.txt").read_text(encoding="utf-8")
+    prompt_version = "independent-verifier.v1"
+    if regla_b_ficha:
+        prompt_version = "independent-verifier.epoc-negacion-explicita.v1"
+        supplement = REPOSITORY / "prompts" / (prompt_version + ".txt")
+        prompt += "\n" + supplement.read_text(encoding="utf-8")
+    # El perfil explícito registra la aprobación de E1 y la regla de la ficha.
+    # Las demás reglas de consistencia conservan su carácter descriptivo.
     review_rules = []
     for rule in compiled["especificacion_completa"].get("consistency_checks", []):
 
@@ -165,7 +182,7 @@ def prepare_verification(laboratory: Path, version: str = "v1") -> None:
     dictionary = OperationalDictionary.model_validate(
         original.model_dump(mode="python")
         | {
-            "clinically_approved": False,
+            "clinically_approved": regla_b_ficha,
             "review_rules": tuple(review_rules),
         }
     )
@@ -178,9 +195,12 @@ def prepare_verification(laboratory: Path, version: str = "v1") -> None:
         "source_yaml_sha256": source_hash,
         "source_dictionary": original.artifact.model_dump(mode="json"),
         "executable_dictionary": dictionary.artifact.model_dump(mode="json"),
-        "clinical_approval": False,
+        "clinical_approval": regla_b_ficha,
         "transformation": "same_definitions_canonical_digest_review_only_implications",
     }
+    if regla_b_ficha:
+        provenance["replacement_policy_sha256"] = content_hash(policy)
+        provenance["verifier_prompt_sha256"] = content_hash(prompt)
     immutable_json(root / "fuente.json", provenance)
     immutable_json(root / "diccionario.json", dictionary.model_dump(mode="json"))
     immutable_json(
@@ -195,11 +215,8 @@ def prepare_verification(laboratory: Path, version: str = "v1") -> None:
             "nota": "Conversión explícita de representación JSON; no infiere estados ni fechas.",
         },
     )
-    immutable_json(
-        root / "politica.json", read_json(REPOSITORY / "configs/epoc/conservative.v1.json")
-    )
-    prompt = (REPOSITORY / "prompts/independent-verifier.v1.txt").read_text(encoding="utf-8")
-    immutable_json(root / "prompt.json", {"version": "independent-verifier.v1", "text": prompt})
+    immutable_json(root / "politica.json", policy_data)
+    immutable_json(root / "prompt.json", {"version": prompt_version, "text": prompt})
     prompt_path = root / "verificador.v1.txt"
     if not prompt_path.exists():
         prompt_path.write_text(prompt, encoding="utf-8")
@@ -211,7 +228,7 @@ def prepare_verification(laboratory: Path, version: str = "v1") -> None:
         dictionary_path="diccionario.json",
         policy_path="politica.json",
         prompt_path="verificador.v1.txt",
-        prompt_version="independent-verifier.v1",
+        prompt_version=prompt_version,
         mock_payload_path="demo-verificador.json",
     )
     # La configuración es editable; repetir la preparación no reemplaza ajustes del usuario.
@@ -224,7 +241,7 @@ def prepare_verification(laboratory: Path, version: str = "v1") -> None:
         {
             "capacidad": "fase2_disponible",
             "configuracion": str(root.relative_to(laboratory) / "config.json"),
-            "diccionario_aprobado": False,
+            "diccionario_aprobado": regla_b_ficha,
             "referencia_experta": "no_proporcionada",
             "demostracion_preparada": True,
             "preparacion_procesa_corpus": False,
@@ -232,10 +249,8 @@ def prepare_verification(laboratory: Path, version: str = "v1") -> None:
         },
         private=True,
     )
-    print(
-        f"Fase 2 preparada: {len(dictionary.variables)} variables del laboratorio. "
-        "Aprobación clínica pendiente."
-    )
+    approval = "Regla de la ficha habilitada." if regla_b_ficha else "Aprobación clínica pendiente."
+    print(f"Fase 2 preparada: {len(dictionary.variables)} variables. {approval}")
     print("Demostración sintética lista. El corpus importado no se ha procesado.")
 
 
@@ -248,7 +263,7 @@ def ensure_current_source(laboratory: Path, version: str) -> Path:
     if digest != recorded["source_yaml_sha256"]:
         raise LabError("La especificación cambió; prepara una nueva versión de verificación.")
     try:
-        _, dictionary, _, config = load_configuration(root / "config.json", {}, "real")
+        _, dictionary, policy, config = load_configuration(root / "config.json", {}, "real")
         prompt = read_json(root / "prompt.json")
     except (ValueError, KeyError):
         raise LabError("La configuración preparada no cumple los contratos de fase 2.") from None
@@ -256,6 +271,16 @@ def ensure_current_source(laboratory: Path, version: str) -> Path:
         raise LabError("El diccionario configurado no corresponde a la fuente preparada.")
     if config.prompt_version != prompt.get("version") or config.prompt != prompt.get("text"):
         raise LabError("El prompt o su versión cambió; prepara una nueva versión de verificación.")
+    if (
+        "verifier_prompt_sha256" in recorded
+        and content_hash(config.prompt) != recorded["verifier_prompt_sha256"]
+    ):
+        raise LabError("El prompt vinculado a la regla cambió; prepara una nueva versión.")
+    if (
+        "replacement_policy_sha256" in recorded
+        and content_hash(policy) != recorded["replacement_policy_sha256"]
+    ):
+        raise LabError("La política de reemplazo cambió; prepara una nueva versión.")
     return root
 
 

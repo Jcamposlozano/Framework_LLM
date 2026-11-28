@@ -3,7 +3,13 @@
 from enum import StrEnum
 from typing import Literal, Protocol, Self, TypeVar
 
-from pydantic import Field, JsonValue, model_validator
+from pydantic import (
+    Field,
+    JsonValue,
+    SerializerFunctionWrapHandler,
+    model_serializer,
+    model_validator,
+)
 
 from extracteval.core.base import ArtifactRef, Contract, Digest, Identifier
 from extracteval.core.documents import Document, Evidence
@@ -186,6 +192,16 @@ class ReplacementRule(Contract):
     # Rules certify documentary sufficiency; quote existence alone never does.
     literal_evidence_sufficient: bool = False
     required_evidence_quotes: tuple[str, ...] = ()
+    evidence_scope: Literal["standalone_sentence"] | None = None
+
+    @model_serializer(mode="wrap")
+    def preserve_default_representation(
+        self, handler: SerializerFunctionWrapHandler
+    ) -> dict[str, object]:
+        data: dict[str, object] = handler(self)
+        if self.evidence_scope is None:
+            data.pop("evidence_scope", None)
+        return data
 
 
 class ReconciliationPolicy(Contract):

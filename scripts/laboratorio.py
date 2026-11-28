@@ -220,6 +220,12 @@ def main() -> None:
         command = subparsers.add_parser(name, help=help_text)
         command.add_argument("--laboratorio", type=Path, required=True)
         command.add_argument("--version", default="v1")
+        if name == "preparar-verificacion":
+            command.add_argument(
+                "--regla-b-ficha",
+                action="store_true",
+                help="Usar E1 aprobado y la regla B de negación explícita de exacerbación actual",
+            )
         if name == "registrar-extraccion-a":
             command.add_argument("--documento-id", required=True)
             command.add_argument("--archivo", type=Path, required=True)
@@ -327,7 +333,9 @@ def main() -> None:
             )
 
             if args.command == "preparar-verificacion":
-                prepare_verification(args.laboratorio, args.version)
+                prepare_verification(
+                    args.laboratorio, args.version, regla_b_ficha=args.regla_b_ficha
+                )
             elif args.command == "estado-verificacion":
                 verification_status(args.laboratorio)
             elif args.command == "registrar-extraccion-a":
