@@ -14,11 +14,13 @@ from verificacion_laboratorio import ensure_current_source, immutable_json
 from extracteval.adapters.storage.json_store import JSONRunStore
 from extracteval.application.configuration import GovernanceAuthorization, load_configuration
 from extracteval.application.extraction import ExtractionExecution, load_extractor
+from extracteval.application.pipeline import run_verification
 from extracteval.cli import main as extracteval_cli
 from extracteval.core.documents import Document
 from extracteval.core.hashing import content_hash
 from extracteval.core.verification import (
     ExtractionSnapshot,
+    IndependentVerification,
     ReconciledExtraction,
     VerificationInput,
     VerificationRunManifest,
@@ -84,7 +86,20 @@ def run_document(
     authorization: GovernanceAuthorization,
     a_config: Path,
     v_config: Path,
-) -> None:
+    *,
+    accept_saved_v_failure: bool = False,
+) -> str | None:
+    vb_dir = output / "vb"
+    a_dir = output / "a"
+    if accept_saved_v_failure and not all(
+        path.is_file()
+        for path in (
+            a_dir / "manifest.json",
+            vb_dir / "manifest-all.json",
+            vb_dir / "verification.json",
+        )
+    ):
+        raise LabError("Continuar requiere una A y un fallo de V ya guardados con manifiesto.")
     document_path = output / "documento.json"
     governance_path = output / "gobierno.json"
     immutable_json(document_path, document.model_dump(mode="json"))
@@ -92,7 +107,6 @@ def run_document(
     immutable_json(governance_path, scoped.model_dump(mode="json"))
     common = ["--mode", "real", "--authorize-real", "--governance", str(governance_path)]
 
-    a_dir = output / "a"
     if extracteval_cli(
         [
             "extract",
@@ -113,11 +127,16 @@ def run_document(
         raise LabError("A no coincide con la nota y la ejecución persistidas.")
 
     entry = output / "entrada-vb.json"
-    immutable_json(
-        entry, VerificationInput(document=document, extraction_a=a).model_dump(mode="json")
-    )
-    vb_dir = output / "vb"
-    if extracteval_cli(
+    inputs = VerificationInput(document=document, extraction_a=a)
+    immutable_json(entry, inputs.model_dump(mode="json"))
+    if accept_saved_v_failure:
+        store = JSONRunStore(vb_dir)
+        manifest = store.get("manifest-all", VerificationRunManifest)
+        if manifest.status != "technical_failure":
+            raise LabError("La nota indicada no tiene un fallo terminal de V.")
+        _, dictionary, policy, verifier = load_configuration(v_config, {}, "real")
+        run_verification(inputs, dictionary, policy, verifier, store, None, mode="real")
+    elif extracteval_cli(
         [
             "verify",
             "--config",
@@ -135,19 +154,31 @@ def run_document(
 
     store = JSONRunStore(vb_dir)
     manifest = store.get("manifest-all", VerificationRunManifest)
+    verification = store.get("verification", IndependentVerification)
     b = store.get("extraction_b", ReconciledExtraction)
+    hashes = store.artifact_hashes()
+    terminal_failure = (
+        manifest.status == "technical_failure" and verification.audit.error is not None
+    )
     if (
         store.get("extraction_a", ExtractionSnapshot) != a
         or manifest.mode != "real"
-        or manifest.status != "completed"
+        or (accept_saved_v_failure and not terminal_failure)
+        or (not accept_saved_v_failure and manifest.status != "completed")
+        or content_hash(manifest.artifact_hashes) != manifest.output_hash
+        or any(hashes.get(name) != digest for name, digest in manifest.artifact_hashes.items())
+        or verification.document_hash != scoped.document_hash
         or b.document_hash != scoped.document_hash
         or b.base_extraction_id != a.base_extraction_id
         or b.base_extraction_hash != content_hash(a)
         or manifest.base_extraction_hash != b.base_extraction_hash
         or manifest.document_id != b.document_id
+        or manifest.verification_id != verification.verification_id
+        or b.verification_id != verification.verification_id
         or manifest.reconciliation_id != b.reconciliation_id
     ):
         raise LabError("El manifiesto no acredita el vínculo de B con la A guardada.")
+    return verification.audit.error.code if verification.audit.error else None
 
 
 def main() -> None:
@@ -156,9 +187,20 @@ def main() -> None:
     parser.add_argument("--gobierno-base", type=Path, required=True)
     parser.add_argument("--ejecutar", action="store_true", help="Ejecutar A y V en OpenAI.")
     parser.add_argument("--limite", type=int, default=361, help="Primeras N notas del sorteo.")
+    parser.add_argument(
+        "--continuar-fallo-vb",
+        type=int,
+        action="append",
+        default=[],
+        metavar="NOTA",
+        help="Continuar tras el fallo terminal ya registrado de esta nota.",
+    )
     args = parser.parse_args()
     if not 1 <= args.limite <= 361:
         parser.error("--limite debe estar entre 1 y 361.")
+    accepted_failures = set(args.continuar_fallo_vb)
+    if any(not 1 <= note <= args.limite for note in accepted_failures):
+        parser.error("Los fallos aceptados deben estar dentro del límite de la ejecución.")
     lab = args.laboratorio.resolve()
     output = lab / "ejecuciones" / VERSION
     position = None
@@ -213,11 +255,29 @@ def main() -> None:
                     "plan_e5_sha256": file_digest(lab / "05_validez/plan_puntuacion_e5.json"),
                 },
             )
+            completed = failures = 0
             for position, document in enumerate(documents[: args.limite], 1):
-                run_document(
-                    document, output / f"nota-{position:03d}", authorization, a_config, v_config
+                failure = run_document(
+                    document,
+                    output / f"nota-{position:03d}",
+                    authorization,
+                    a_config,
+                    v_config,
+                    accept_saved_v_failure=position in accepted_failures,
                 )
-                print(f"Notas completadas o recuperadas: {position}/{args.limite}", flush=True)
+                if failure:
+                    failures += 1
+                    print(f"Nota {position}. Fallo terminal V conservado: {failure}.", flush=True)
+                else:
+                    completed += 1
+                if accepted_failures:
+                    print(
+                        f"Notas verificadas: {position}/{args.limite} | "
+                        f"Completadas: {completed} | Fallos V registrados: {failures}",
+                        flush=True,
+                    )
+                else:
+                    print(f"Notas completadas o recuperadas: {position}/{args.limite}", flush=True)
     except LabError as error:
         location = f"Nota {position}. " if position is not None else ""
         parser.exit(2, f"{location}{error}\n")
