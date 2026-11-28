@@ -92,6 +92,82 @@ def test_lab_demo_each_stage_and_progress(lab):
     assert execute_verification(lab) == 0
 
 
+@pytest.mark.parametrize(
+    ("text", "rule_id", "offset_delta", "section", "expected"),
+    [
+        ("Sin exacerbación actual.", True, 0, None, "REPLACE_WITH_VERIFIED"),
+        ("Sin exacerbación actual.", False, 0, None, "HUMAN_REVIEW"),
+        ("Sin exacerbación actual.", True, 1, None, "HUMAN_REVIEW"),
+        ("Sin exacerbación actual.", True, 0, "inventada", "HUMAN_REVIEW"),
+        ("Si refiere sin exacerbación actual. Control posterior.", True, 0, None, "HUMAN_REVIEW"),
+        ("Consulta anterior. Sin exacerbación actual.", False, 0, None, "HUMAN_REVIEW"),
+    ],
+)
+def test_lab_reconciles_with_the_opt_in_epoc_rule(
+    lab, text, rule_id, offset_delta, section, expected
+):
+    version = "e5-b-v1"
+    prepare_verification(lab, version, regla_b_ficha=True)
+    root = lab / "configuraciones/verificacion" / version
+    policy = json.loads((root / "politica.json").read_bytes())
+    rule = policy["replacement_rules"][0]
+    inputs = json.loads((root / "demo-entrada.json").read_bytes())
+    payload = json.loads((root / "demo-verificador.json").read_bytes())
+    document_id = inputs["document"]["document_id"]
+    inputs["document"].update(text=text, sections=[])
+    original = inputs["extraction_a"]
+    original_value = next(
+        result
+        for result in original["results"]
+        if result["trace"]["variable_id"] == "exacerbacion_actual"
+    )
+    original_value["value"]["value"] = "true"
+    proposal = next(
+        item for item in payload["variables"] if item["variable_id"] == rule["variable_id"]
+    )
+    start = text.casefold().index(rule["required_evidence_quotes"][0].casefold())
+    quote = text[start : start + len(rule["required_evidence_quotes"][0])]
+    proposal.update(
+        proposed_value=rule["proposed_value"],
+        applied_rule_ids=[rule["rule_id"]] if rule_id else [],
+        evidence=[
+            {
+                "document_id": document_id,
+                "quote": quote,
+                "section": section,
+                "start": start + offset_delta,
+                "end": start + len(quote) + offset_delta,
+            }
+        ],
+        evidence_type="literal",
+    )
+    write_json(root / "demo-entrada.json", inputs)
+    write_json(root / "demo-verificador.json", payload)
+    assert execute_verification(lab, version=version, execution="test-b") == 0
+    execution = lab / "ejecuciones/fase2/test-b"
+    result = json.loads((execution / "extraction_b.json").read_bytes())
+    decision = next(
+        item for item in result["decisions"] if item["variable_id"] == rule["variable_id"]
+    )
+    assert decision["action"] == expected
+    assert decision["resulting_value"]["value"] == (
+        "false" if expected == "REPLACE_WITH_VERIFIED" else "true"
+    )
+    assert json.loads((execution / "extraction_a.json").read_bytes()) == original
+
+
+def test_opt_in_lab_detects_a_changed_replacement_policy(lab):
+    version = "e5-b-v1"
+    prepare_verification(lab, version, regla_b_ficha=True)
+    root = lab / "configuraciones/verificacion" / version
+    path = root / "politica.json"
+    policy = json.loads(path.read_bytes())
+    policy["replacement_rules"] = []
+    write_json(path, policy)
+    with pytest.raises(LabError, match="política de reemplazo cambió"):
+        execute_verification(lab, version=version, dry_run=True)
+
+
 def test_register_a_preserves_raw_bytes_auxiliary_and_null_semantics(lab, tmp_path):
     prepare_verification(lab)
     raw = {

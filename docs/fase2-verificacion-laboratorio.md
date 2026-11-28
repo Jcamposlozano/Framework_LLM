@@ -177,3 +177,28 @@ La entrada al laboratorio comprueba que el diccionario configurado corresponde a
 La ausencia de `entity_id` no impide ejecutar V, comparar o reconciliar un documento. Los requisitos de agrupación por paciente pertenecen al diseño estadístico posterior; `validar-diseno` comprueba ese protocolo científico y no sustituye a la CLI documental.
 
 El informe [Auditoría de fase 2](phase2-audit.md) contiene el inventario, los bloques consolidados, defectos corregidos, pruebas y pendientes.
+
+## Regla aprobada de negación explícita en EPOC
+
+Para un laboratorio cuyo responsable ya aprobó E1 y la regla de
+`exacerbacion_actual=false`, prepara una versión nueva:
+
+```bash
+.venv/bin/python scripts/laboratorio.py preparar-verificacion \
+  --laboratorio laboratorios/mi_estudio_001 --version e5-b-negacion-v1 --regla-b-ficha
+.venv/bin/python scripts/laboratorio.py preparar-extractor \
+  --laboratorio laboratorios/mi_estudio_001 --version e5-b-negacion-v1
+```
+
+La preparación vincula la política y el prompt a esa versión y se hace
+sin llamadas externas. En esta implementación conservadora, la regla
+solo acepta la oración completa «Sin exacerbación actual.» con offsets
+verificables y una propuesta explícita de V de que la negación corresponde
+a la consulta evaluada. Si el documento declara secciones, se comprueba
+la sección indicada. La revisión humana sigue disponible para los casos
+que quedan fuera de esa regla. El contexto temporal y la suficiencia
+clínica de la evidencia se verifican en desarrollo antes de la evaluación.
+
+Las nuevas ejecuciones A y B deben compartir el diccionario ejecutable de
+`e5-b-negacion-v1`. La activación cambia su huella; las extracciones de
+la configuración anterior siguen vinculadas a su propia versión.

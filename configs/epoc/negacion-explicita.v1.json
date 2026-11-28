@@ -1,0 +1,21 @@
+{
+  "policy_id": "epoc-negacion-explicita",
+  "version": "epoc-negacion-explicita.v1",
+  "replacement_rules": [
+    {
+      "rule_id": "exacerbacion-actual-negacion-explicita-v1",
+      "approved": true,
+      "variable_id": "exacerbacion_actual",
+      "proposed_value": {
+        "kind": "categorical",
+        "value": "false"
+      },
+      "semantic_state": "value",
+      "required_rule_ids": ["exacerbacion-actual-negacion-explicita-v1"],
+      "literal_evidence_sufficient": true,
+      "required_evidence_quotes": ["Sin exacerbación actual."],
+      "evidence_scope": "standalone_sentence"
+    }
+  ],
+  "unresolved_action": "HUMAN_REVIEW"
+}

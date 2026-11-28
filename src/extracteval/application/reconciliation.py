@@ -12,8 +12,46 @@ from extracteval.core.verification import (
     ReconciledExtraction,
     ReconciliationDecision,
     ReconciliationPolicy,
+    ReplacementRule,
     SemanticState,
+    VariableVerification,
 )
+
+
+def _replacement_evidence_matches(
+    rule: ReplacementRule,
+    proposal: VariableVerification,
+    document: Document,
+    findings: tuple[str, ...],
+) -> bool:
+    problems = {finding for finding in findings if finding.startswith("verifier:")}
+    if rule.evidence_scope is None:
+        return not problems and all(
+            any(quote in (item.quote or "") for item in proposal.evidence)
+            for quote in rule.required_evidence_quotes
+        )
+
+    # Without declared sections, offsets still locate evidence in the original text.
+    if not document.sections:
+        problems.discard("verifier:evidence_section_missing")
+    if problems or len(proposal.evidence) != 1 or document.text is None:
+        return False
+    item = proposal.evidence[0]
+    if item.start is None or item.end is None or item.quote is None:
+        return False
+    if len(rule.required_evidence_quotes) != 1:
+        return False
+    if item.quote.casefold() != rule.required_evidence_quotes[0].casefold():
+        return False
+    before = document.text[: item.start]
+    after = document.text[item.end :]
+    left = before.rstrip(" \t")
+    starts_sentence = (
+        not left
+        or left.endswith(("\n", "\r"))
+        or (before[-1:].isspace() and left.endswith((".", "!", "?")))
+    )
+    return starts_sentence and (not after or after[0].isspace())
 
 
 def reconcile(
@@ -54,7 +92,6 @@ def reconcile(
             elif dictionary.clinically_approved and v is not None:
                 for rule in policy.replacement_rules:
                     # Evidence problems on A alone do not disqualify a well-supported proposal.
-                    verifier_problems = any(f.startswith("verifier:") for f in item.findings)
                     consistency_problems = any("inconsistency:" in f for f in item.findings)
                     if (
                         rule.approved
@@ -67,16 +104,16 @@ def reconcile(
                         and set(v.applied_rule_ids) <= set(rule.required_rule_ids) | {rule.rule_id}
                         and rule.literal_evidence_sufficient
                         and rule.required_evidence_quotes
-                        and all(
-                            any(quote in (e.quote or "") for e in v.evidence)
-                            for quote in rule.required_evidence_quotes
-                        )
                         and v.evidence_type == "literal"
                         and v.evidence
                         and not v.uncertainty_flags
                         and not v.requires_human_review
-                        and not verifier_problems
                         and not consistency_problems
+                        and (
+                            rule.evidence_scope is None
+                            or (old, old_state) != (v.proposed_value, v.semantic_state)
+                        )
+                        and _replacement_evidence_matches(rule, v, document, item.findings)
                     ):
                         dictionary.variable(key).validate_value(rule.proposed_value)
                         action, reason = (
